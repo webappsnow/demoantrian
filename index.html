@@ -79,12 +79,11 @@
         </div>
     </div>
 
-   <script>
+    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
 
-        // Cek otomatis saat halaman dimuat: Jika sebelumnya sudah pernah antri, langsung tampilkan kartu statusnya!
         window.addEventListener("DOMContentLoaded", () => {
             if (myRegisteredQueueNo) {
                 document.getElementById("formContainer").classList.add("hidden");
@@ -100,7 +99,6 @@
         document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
             
-            // Pencegahan ekstra: Jika di localStorage sudah ada nomor, jangan biarkan daftar lagi!
             if (localStorage.getItem("my_queue_number")) {
                 alert("Anda sudah terdaftar di dalam antrian!");
                 location.reload();
@@ -131,7 +129,6 @@
 
                     myRegisteredQueueNo = "A-" + ("000" + nextNum).slice(-3);
 
-                    // Simpan permanen di browser agar aman saat direfresh
                     localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                     localStorage.setItem("my_queue_name", nama);
 
@@ -140,7 +137,6 @@
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
-                    // Kirim ke Google Sheets di latar belakang
                     fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                         method: "GET",
                         mode: "no-cors"
@@ -169,21 +165,22 @@
                 });
         });
 
-       function fetchAllQueueStatus() {
+        function fetchAllQueueStatus() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
+                    const listContainer = document.getElementById("liveQueueList");
+                    
                     if (!data || !data.list) return;
 
-                    const listContainer = document.getElementById("liveQueueList");
-                    listContainer.innerHTML = ""; // Bersihkan tulisan memuat
+                    // Bersihkan kontainer list di awal agar teks "memuat" hilang total
+                    listContainer.innerHTML = ""; 
 
                     if (data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
                         return;
                     }
 
-                    // Jika nomor lokal belum valid atau belum cocok, sinkronkan otomatis dengan nama di localStorage
                     let savedName = localStorage.getItem("my_queue_name");
                     if (savedName && (!myRegisteredQueueNo || !data.list.some(item => item.noAntrian === myRegisteredQueueNo))) {
                         let matched = data.list.slice().reverse().find(item => item.nama && item.nama.trim().toLowerCase() === savedName.trim().toLowerCase());
@@ -192,14 +189,12 @@
                             localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                             document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                         } else if (data.list.length > 0) {
-                            // Ambil baris terakhir sebagai fallback jika nama tidak ketemu persis
                             myRegisteredQueueNo = data.list[data.list.length - 1].noAntrian;
                             localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                             document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                         }
                     }
 
-                    // Hitung estimasi sisa antrian di depan
                     let waitingList = data.list.filter(item => item.status === "menunggu");
                     let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
                     let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
@@ -222,7 +217,6 @@
                         }
                     }
 
-                    // Render semua daftar antrian ke layar
                     data.list.forEach(item => {
                         let badgeColor = "bg-slate-800 text-slate-400";
                         let statusText = item.status;
