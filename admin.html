@@ -126,13 +126,14 @@
                             <tr>
                                 <th class="p-3.5">No</th>
                                 <th class="p-3.5">Nama</th>
+                                <th class="p-3.5">Telepon</th>
                                 <th class="p-3.5">Waktu Daftar</th>
                                 <th class="p-3.5">Status</th>
                             </tr>
                         </thead>
                         <tbody id="queueTableBody" class="divide-y-2 dark:divide-slate-700 light:divide-slate-200">
                             <tr>
-                                <td colspan="4" class="text-center p-6 text-muted font-bold">Memuat data...</td>
+                                <td colspan="5" class="text-center p-6 text-muted font-bold">Memuat data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -239,7 +240,7 @@
             loadQueue();
         });
 
-        // Fungsi Suara (Text-to-Speech)
+        // Fungsi Suara (Text-to-Speech) - Diulang 2 kali otomatis
         function speakQueue(noAntrian) {
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
@@ -247,13 +248,14 @@
             let cleanNo = noAntrian.toString().replace("-", " ");
             let msgText = `Nomor antrian ${cleanNo}, silakan menuju ruangan.`;
             
-            let utterance = new SpeechSynthesisUtterance(msgText);
-            utterance.lang = 'id-ID';
-            utterance.rate = 0.95;
-            utterance.pitch = 1.0;
-            utterance.volume = 1.0;
-
-            window.speechSynthesis.speak(utterance);
+            for (let i = 0; i < 2; i++) {
+                let utterance = new SpeechSynthesisUtterance(msgText);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.95;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         function formatWaktuAman(rawWaktu) {
@@ -289,7 +291,7 @@
                     tbody.innerHTML = "";
                     
                     if (allList.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-muted font-bold">Belum ada antrian terdaftar</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-muted font-bold">Belum ada antrian terdaftar</td></tr>`;
                         return;
                     }
 
@@ -318,6 +320,7 @@
                             <tr class="transition">
                                 <td class="p-3.5 font-black text-main text-sm sm:text-base">${item.noAntrian}</td>
                                 <td class="p-3.5 text-main font-extrabold max-w-[150px] truncate">${item.nama}</td>
+                                <td class="p-3.5 text-muted font-bold">${item.telepon || '-'}</td>
                                 <td class="p-3.5 text-muted font-bold font-mono">${waktuBersih}</td>
                                 <td class="p-3.5">
                                     <div class="flex items-center space-x-1">
