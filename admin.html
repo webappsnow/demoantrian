@@ -96,6 +96,9 @@
                     <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-3.5 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
                         Panggil Berikutnya
                     </button>
+                    <button onclick="reSpeak()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm">
+                        Panggil Ulang (Re-Call)
+                    </button>
                     <button id="btnSkip" onclick="skipCurrent()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm">
                         Lewati (Skip)
                     </button>
@@ -255,6 +258,14 @@
                 utterance.pitch = 1.0;
                 utterance.volume = 1.0;
                 window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Fungsi Panggil Ulang (Re-Call) nomor yang sedang aktif
+        function reSpeak() {
+            let currentNo = document.getElementById("currentCall").innerText;
+            if (currentNo !== "-") {
+                speakQueue(currentNo);
             }
         }
 
