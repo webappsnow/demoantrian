@@ -121,25 +121,32 @@
             });
         });
 
-        function fetchQueueDataAndSync(targetNama) {
-            // Menggunakan opsi tambahan untuk mengatasi masalah cache/koneksi
+       function fetchQueueDataAndSync(targetNama) {
             fetch(`${SCRIPT_URL}?action=getQueue`, {
                 method: "GET",
                 redirect: "follow"
             })
             .then(res => res.json())
             .then(data => {
-                if (!data || !data.list) return;
+                if (!data || !data.list || data.list.length === 0) return;
 
-                // Jika nomor antrian lokal belum ada, cari berdasarkan nama pendaftar terakhir
+                // Jika nomor antrian lokal belum ada, cari otomatis
                 if (!myRegisteredQueueNo) {
-                    let found = data.list.slice().reverse().find(item => item.nama.toLowerCase() === targetNama.toLowerCase());
+                    // 1. Cari berdasarkan nama yang diinput (abaikan huruf besar/kecil)
+                    let found = data.list.slice().reverse().find(item => item.nama && item.nama.trim().toLowerCase() === targetNama.trim().toLowerCase());
+                    
                     if (found) {
                         myRegisteredQueueNo = found.noAntrian;
-                        document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                    } else if (data.list.length > 0) {
-                        // Ambil baris paling terakhir sebagai cadangan
-                        myRegisteredQueueNo = data.list[data.list.length - 1].noAntrian;
+                    } else {
+                        // 2. Jika nama tidak pas, ambil baris paling bawah/terakhir di spreadsheet sebagai nomor milik user
+                        let lastItem = data.list[data.list.length - 1];
+                        if (lastItem) {
+                            myRegisteredQueueNo = lastItem.noAntrian;
+                        }
+                    }
+
+                    // Tampilkan nomor antrian ke layar jika sudah didapatkan
+                    if (myRegisteredQueueNo) {
                         document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     }
                 }
@@ -169,11 +176,6 @@
                 // Render daftar seluruh antrian secara live
                 const listContainer = document.getElementById("liveQueueList");
                 listContainer.innerHTML = "";
-
-                if (data.list.length === 0) {
-                    listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
-                    return;
-                }
 
                 data.list.forEach(item => {
                     let badgeColor = "bg-slate-800 text-slate-400";
