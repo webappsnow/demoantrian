@@ -46,7 +46,7 @@
             <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
                 <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Nomor Antrian Anda</p>
-                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">A-001</h2>
+                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">-</h2>
                 <p id="displayName" class="text-slate-300 font-medium"></p>
             </div>
 
@@ -65,7 +65,7 @@
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Daftar Status Antrian Live</p>
                 <div class="max-h-40 overflow-y-auto space-y-2 pr-1" id="liveQueueList">
-                    <!-- Data masuk lewat JS -->
+                    <p class="text-xs text-slate-500 text-center py-2">Memuat daftar antrian...</p>
                 </div>
             </div>
 
@@ -78,9 +78,11 @@
             Powered by Universal Queue SaaS System
         </div>
     </div>
-<script>
+
+    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let autoUpdateInterval = null;
+        let myRegisteredQueueNo = null;
 
         document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
@@ -91,129 +93,120 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // 1. Kirim data pendaftaran (tanpa menunggu balasan JSON karena mode no-cors)
+            // 1. Kirim data menggunakan mode no-cors agar masuk ke Spreadsheet
             fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                 method: "GET",
                 mode: "no-cors"
-            });
+            })
+            .then(() => {
+                // 2. Beri jeda 1.5 detik agar Google Sheets selesai menulis baris baru
+                setTimeout(() => {
+                    document.getElementById("formContainer").classList.add("hidden");
+                    document.getElementById("resultContainer").classList.remove("hidden");
+                    document.getElementById("displayName").innerText = nama;
+                    
+                    // Tarik data antrian untuk mencocokkan nomor terbaru
+                    fetchQueueDataAndSync(nama);
 
-            // 2. Beri jeda 1,5 detik agar Google Sheets selesai menulis, lalu ambil nomor antrian terbaru berdasarkan nama
-            setTimeout(() => {
-                fetchAndShowMyNumber(nama);
-            }, 1500);
+                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = setInterval(() => {
+                        fetchQueueDataAndSync(nama);
+                    }, 4000);
+                }, 1500);
+            })
+            .catch(() => {
+                alert("Terjadi kesalahan jaringan.");
+                btn.disabled = false;
+                btn.innerText = "Ambil Nomor Antrian";
+            });
         });
 
-        function fetchAndShowMyNumber(targetNama) {
-            fetch(`${SCRIPT_URL}?action=getQueue`)
-                .then(res => res.json())
-                .then(data => {
-                    // Cari data antrian yang namanya sama persis dan statusnya menunggu
+        function fetchQueueDataAndSync(targetNama) {
+            // Menggunakan opsi tambahan untuk mengatasi masalah cache/koneksi
+            fetch(`${SCRIPT_URL}?action=getQueue`, {
+                method: "GET",
+                redirect: "follow"
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.list) return;
+
+                // Jika nomor antrian lokal belum ada, cari berdasarkan nama pendaftar terakhir
+                if (!myRegisteredQueueNo) {
                     let found = data.list.slice().reverse().find(item => item.nama.toLowerCase() === targetNama.toLowerCase());
-                    
                     if (found) {
-                        document.getElementById("formContainer").classList.add("hidden");
-                        document.getElementById("resultContainer").classList.remove("hidden");
-                        
-                        document.getElementById("displayNo").innerText = found.noAntrian;
-                        document.getElementById("displayName").innerText = found.nama;
-                        
-                        fetchAllQueueStatus(found.noAntrian);
-
-                        if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-                        autoUpdateInterval = setInterval(() => {
-                            fetchAllQueueStatus(found.noAntrian);
-                        }, 4000);
-                    } else {
-                        // Jika tidak ketemu lewat pencarian nama, ambil baris paling akhir di spreadsheet
-                        let lastItem = data.list[data.list.length - 1];
-                        if (lastItem) {
-                            document.getElementById("formContainer").classList.add("hidden");
-                            document.getElementById("resultContainer").classList.remove("hidden");
-                            
-                            document.getElementById("displayNo").innerText = lastItem.noAntrian;
-                            document.getElementById("displayName").innerText = lastItem.nama;
-                            
-                            fetchAllQueueStatus(lastItem.noAntrian);
-                        } else {
-                            alert("Gagal memuat nomor antrian, silakan coba lagi.");
-                            location.reload();
-                        }
+                        myRegisteredQueueNo = found.noAntrian;
+                        document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                    } else if (data.list.length > 0) {
+                        // Ambil baris paling terakhir sebagai cadangan
+                        myRegisteredQueueNo = data.list[data.list.length - 1].noAntrian;
+                        document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     }
-                })
-                .catch(() => {
-                    alert("Gagal terhubung ke server antrian.");
-                    document.getElementById("btnSubmit").disabled = false;
-                    document.getElementById("btnSubmit").innerText = "Ambil Nomor Antrian";
-                });
-        }
+                }
 
-        function fetchAllQueueStatus(myQueueNo) {
-            fetch(`${SCRIPT_URL}?action=getQueue`)
-                .then(res => res.json())
-                .then(data => {
+                // Update tampilan sisa antrian di depan
+                if (myRegisteredQueueNo) {
                     let waitingList = data.list.filter(item => item.status === "menunggu");
-                    let myIndex = waitingList.findIndex(item => item.noAntrian === myQueueNo);
-                    
-                    let peopleAhead = 0;
-                    let foundInList = data.list.find(item => item.noAntrian === myQueueNo);
+                    let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
+                    let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
 
-                    if (!foundInList) {
-                        document.getElementById("statusInfoText").innerText = "Status Anda:";
-                        document.getElementById("displayWaiting").innerText = "-";
-                        return;
-                    }
-
-                    if (foundInList.status === "selesai") {
-                        document.getElementById("statusInfoText").innerText = "Status Anda:";
-                        document.getElementById("displayWaiting").innerText = "SELESAI";
-                    } else if (foundInList.status === "dipanggil") {
-                        document.getElementById("statusInfoText").innerText = "Status Anda:";
-                        document.getElementById("displayWaiting").innerText = "GILIRAN!";
-                    } else {
-                        if (myIndex !== -1) {
-                            peopleAhead = myIndex;
-                            document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
-                            document.getElementById("displayWaiting").innerText = peopleAhead;
+                    if (foundInList) {
+                        if (foundInList.status === "selesai") {
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "SELESAI";
+                        } else if (foundInList.status === "dipanggil") {
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "GILIRAN!";
+                        } else {
+                            if (myIndex !== -1) {
+                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
+                                document.getElementById("displayWaiting").innerText = myIndex;
+                            }
                         }
                     }
+                }
 
-                    const listContainer = document.getElementById("liveQueueList");
-                    listContainer.innerHTML = "";
+                // Render daftar seluruh antrian secara live
+                const listContainer = document.getElementById("liveQueueList");
+                listContainer.innerHTML = "";
 
-                    if (data.list.length === 0) {
-                        listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
-                        return;
+                if (data.list.length === 0) {
+                    listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
+                    return;
+                }
+
+                data.list.forEach(item => {
+                    let badgeColor = "bg-slate-800 text-slate-400";
+                    let statusText = item.status;
+
+                    if (item.status === "menunggu") {
+                        badgeColor = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                        statusText = "Menunggu";
+                    } else if (item.status === "dipanggil") {
+                        badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
+                        statusText = "Dipanggil";
+                    } else if (item.status === "selesai") {
+                        badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                        statusText = "Selesai";
                     }
 
-                    data.list.forEach(item => {
-                        let badgeColor = "bg-slate-800 text-slate-400";
-                        let statusText = item.status;
+                    let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
+                    let cardHighlight = isMyNumber ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 bg-slate-900/50";
 
-                        if (item.status === "menunggu") {
-                            badgeColor = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
-                            statusText = "Menunggu";
-                        } else if (item.status === "dipanggil") {
-                            badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
-                            statusText = "Dipanggil";
-                        } else if (item.status === "selesai") {
-                            badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-                            statusText = "Selesai";
-                        }
-
-                        let isMyNumber = (item.noAntrian === myQueueNo);
-                        let cardHighlight = isMyNumber ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 bg-slate-900/50";
-
-                        listContainer.innerHTML += `
-                            <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-extrabold text-white text-sm">${item.noAntrian}</span>
-                                    <span class="text-slate-300 truncate max-w-[120px]">${item.nama} ${isMyNumber ? '(Anda)' : ''}</span>
-                                </div>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider ${badgeColor}">${statusText}</span>
+                    listContainer.innerHTML += `
+                        <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-extrabold text-white text-sm">${item.noAntrian}</span>
+                                <span class="text-slate-300 truncate max-w-[120px]">${item.nama} ${isMyNumber ? '(Anda)' : ''}</span>
                             </div>
-                        `;
-                    });
+                            <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider ${badgeColor}">${statusText}</span>
+                        </div>
+                    `;
                 });
+            })
+            .catch(err => {
+                console.error("Gagal menarik data:", err);
+            });
         }
     </script>
 </body>
