@@ -61,7 +61,7 @@
                 <p id="modalMessage" class="text-xs sm:text-sm text-muted font-bold mt-2">Pesan informasi sistem.</p>
             </div>
             <div id="modalButtonContainer" class="space-y-2">
-                <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition cursor-pointer shadow-md">
+                <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
                     OK, Mengerti
                 </button>
             </div>
@@ -123,23 +123,23 @@
                     <p id="currentName" class="text-xs sm:text-sm font-extrabold text-main px-1 leading-snug truncate">-</p>
                 </div>
                 <div class="mt-6 sm:mt-8 space-y-2.5 sm:space-y-3">
-                    <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm hover:opacity-95 transition shadow-md cursor-pointer">
-                        Panggil Berikutnya
+                    <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm hover:opacity-95 transition shadow-md cursor-pointer flex items-center justify-center space-x-2">
+                        <span>Panggil Berikutnya</span>
                     </button>
-                    <button onclick="reSpeak()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm">
-                        Panggil Ulang (Re-Call)
+                    <button id="btnRespeak" onclick="reSpeak()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
+                        <span>Panggil Ulang (Re-Call)</span>
                     </button>
-                    <button id="btnSkip" onclick="skipCurrent()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm">
-                        Lewati (Skip)
+                    <button id="btnSkip" onclick="skipCurrent()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
+                        <span>Lewati (Skip)</span>
                     </button>
-                    <button onclick="downloadExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
+                    <button id="btnExcel" onclick="downloadExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                         </svg>
                         <span>Unduh Rekap Excel</span>
                     </button>
-                    <button onclick="confirmResetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80">
-                        Reset Antrian Hari Ini
+                    <button id="btnReset" onclick="confirmResetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80 flex items-center justify-center space-x-2">
+                        <span>Reset Antrian Hari Ini</span>
                     </button>
                 </div>
             </div>
@@ -184,13 +184,23 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let modalCallback = null;
 
+        function spinnerHtml(text) {
+            return `
+                <svg class="animate-spin h-4 w-4 inline-block mr-1.5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>${text}</span>
+            `;
+        }
+
         function unlockPanel() {
             let pin = document.getElementById("pinInput").value;
             let btn = document.getElementById("btnLogin");
             if (!pin) return;
 
             btn.disabled = true;
-            btn.innerText = "Memeriksa...";
+            btn.innerHTML = spinnerHtml("Memeriksa...");
 
             fetch(`${SCRIPT_URL}?action=verifyPin&pin=${pin}`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
@@ -220,17 +230,11 @@
             if (event.key === "Enter") unlockPanel();
         });
 
-        // Kontrol Status Buka/Tutup dengan Spinner Proses
+        // 1. Tombol Toggle Status Buka/Tutup
         function toggleQueueStatus() {
             let btn = document.getElementById("btnToggleStatus");
             btn.disabled = true;
-            btn.innerHTML = `
-                <svg class="animate-spin h-4 w-4 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Memproses...</span>
-            `;
+            btn.innerHTML = spinnerHtml("Memproses...");
 
             fetch(`${SCRIPT_URL}?action=toggleStatus`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
@@ -338,9 +342,21 @@
             }
         }
 
+        // 2. Tombol Panggil Ulang (Re-Call) dengan Spinner
         function reSpeak() {
             let currentNo = document.getElementById("currentCall").innerText;
-            if (currentNo !== "-") speakQueue(currentNo);
+            if (currentNo === "-") return;
+
+            let btn = document.getElementById("btnRespeak");
+            btn.disabled = true;
+            btn.innerHTML = spinnerHtml("Memanggil...");
+
+            speakQueue(currentNo);
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = `<span>Panggil Ulang (Re-Call)</span>`;
+            }, 1000);
         }
 
         function formatWaktuAman(rawWaktu) {
@@ -421,16 +437,17 @@
                 .catch(err => console.error("Gagal memuat antrian:", err));
         }
 
+        // 3. Tombol Panggil Berikutnya dengan Spinner
         function callNext() {
             const btn = document.getElementById("btnNext");
             btn.disabled = true;
-            btn.innerText = "Memproses...";
+            btn.innerHTML = spinnerHtml("Memproses...");
 
             fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     btn.disabled = false;
-                    btn.innerText = "Panggil Berikutnya";
+                    btn.innerHTML = `<span>Panggil Berikutnya</span>`;
                     if (data.status === "success" && data.noAntrian) {
                         speakQueue(data.noAntrian);
                     } else if (data.status === "empty") {
@@ -438,12 +455,31 @@
                     }
                     loadQueue();
                 })
-                .catch(() => { btn.disabled = false; btn.innerText = "Panggil Berikutnya"; loadQueue(); });
+                .catch(() => { 
+                    btn.disabled = false; 
+                    btn.innerHTML = `<span>Panggil Berikutnya</span>`; 
+                    loadQueue(); 
+                });
         }
 
+        // 4. Tombol Lewati (Skip) dengan Spinner
         function skipCurrent() {
+            const btn = document.getElementById("btnSkip");
+            btn.disabled = true;
+            btn.innerHTML = spinnerHtml("Melewati...");
+
             fetch(`${SCRIPT_URL}?action=skip&loket=Loket 1`, { method: "GET", redirect: "follow" })
-                .then(res => res.json()).then(() => loadQueue());
+                .then(res => res.json())
+                .then(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Lewati (Skip)</span>`;
+                    loadQueue();
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Lewati (Skip)</span>`;
+                    loadQueue();
+                });
         }
 
         function callSpecific(noAntrian) {
@@ -452,10 +488,23 @@
                 .then(res => res.json()).then(() => loadQueue());
         }
 
+        // 5. Tombol Unduh Excel dengan Spinner
         function downloadExcel() {
+            const btn = document.getElementById("btnExcel");
+            btn.disabled = true;
+            btn.innerHTML = spinnerHtml("Mengunduh...");
+
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
+                    btn.disabled = false;
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Unduh Rekap Excel</span>
+                    `;
+
                     if (!data || !data.list || data.list.length === 0) {
                         showModal("Informasi", "Tidak ada data untuk diunduh.");
                         return;
@@ -468,13 +517,32 @@
                     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
                     a.download = `Rekap_Antrian_${new Date().toISOString().slice(0, 10)}.csv`;
                     a.click();
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>Unduh Rekap Excel</span>`;
                 });
         }
 
+        // 6. Tombol Reset Antrian dengan Spinner
         function confirmResetData() {
             showModal("Konfirmasi Reset", "Yakin ingin mereset seluruh antrian hari ini?", () => {
+                const btnReset = document.getElementById("btnReset");
+                btnReset.disabled = true;
+                btnReset.innerHTML = spinnerHtml("Mereset...");
+
                 fetch(`${SCRIPT_URL}?action=reset`, { method: "GET", redirect: "follow" })
-                    .then(res => res.json()).then(() => { showModal("Berhasil", "Antrian direset!"); loadQueue(); });
+                    .then(res => res.json())
+                    .then(() => {
+                        btnReset.disabled = false;
+                        btnReset.innerHTML = `<span>Reset Antrian Hari Ini</span>`;
+                        showModal("Berhasil", "Antrian direset!");
+                        loadQueue();
+                    })
+                    .catch(() => {
+                        btnReset.disabled = false;
+                        btnReset.innerHTML = `<span>Reset Antrian Hari Ini</span>`;
+                    });
             }, true);
         }
 
