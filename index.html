@@ -45,8 +45,9 @@
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
+<script>
+        const SCRIPT_URL = "MASUKKAN_URL_GAS_ANDA_DISINI";
+        let autoUpdateInterval = null;
 
         document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
@@ -64,7 +65,15 @@
                     document.getElementById("resultContainer").classList.remove("hidden");
                     document.getElementById("displayNo").innerText = data.noAntrean;
                     document.getElementById("displayName").innerText = data.nama;
-                    fetchStatusInfo();
+                    
+                    // Langsung ambil data sisa antrean pertama kali
+                    fetchStatusInfo(data.noAntrean);
+
+                    // Set interval agar sisa antrean di HP customer ikut update live tiap 4 detik
+                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = setInterval(() => {
+                        fetchStatusInfo(data.noAntrean);
+                    }, 4000);
                 })
                 .catch(err => {
                     alert("Terjadi kesalahan, silakan coba lagi.");
@@ -73,11 +82,33 @@
                 });
         });
 
-        function fetchStatusInfo() {
+        function fetchStatusInfo(myQueueNo) {
             fetch(`${SCRIPT_URL}?action=getQueue`)
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById("displayWaiting").innerText = data.waitingCount;
+                    // Hitung berapa orang yang statusnya "menunggu" dan berada di urutan sebelum nomor customer ini
+                    let waitingList = data.list.filter(item => item.status === "menunggu");
+                    
+                    // Cari posisi nomor customer dalam daftar menunggu
+                    let myIndex = waitingList.findIndex(item => item.noAntrean === myQueueNo);
+                    
+                    let peopleAhead = 0;
+                    if (myIndex !== -1) {
+                        // Jika masih ada di daftar menunggu, orang di depannya adalah index-nya
+                        peopleAhead = myIndex;
+                    } else {
+                        // Jika nomornya sudah tidak ada di list menunggu (artinya sedang dipanggil atau sudah selesai)
+                        // Kita cek apakah sedang dipanggil
+                        if (data.current && data.current.noAntrean === myQueueNo) {
+                            peopleAhead = 0;
+                            document.getElementById("displayWaiting").innerText = "Giliran Anda Sekarang!";
+                            return;
+                        } else {
+                            peopleAhead = 0;
+                        }
+                    }
+
+                    document.getElementById("displayWaiting").innerText = `${peopleAhead} orang`;
                 });
         }
     </script>
