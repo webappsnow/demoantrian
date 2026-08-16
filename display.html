@@ -31,12 +31,11 @@
         
         <!-- Sisi Kiri: Nomor Utama yang Dipanggil -->
         <div class="col-span-12 lg:col-span-8 glass-card rounded-[2.5rem] p-8 sm:p-12 flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[400px]">
-            <div class="absolute top-0 left-0 bg-emerald-600 px-8 py-3 rounded-br-3xl text-sm sm:text-base font-black tracking-widest uppercase shadow-md">
+            <div id="statusHeader" class="absolute top-0 left-0 bg-emerald-600 px-8 py-3 rounded-br-3xl text-sm sm:text-base font-black tracking-widest uppercase shadow-md hidden">
                 Sedang Dipanggil
             </div>
-            <h2 id="displayCurrent" class="text-7xl sm:text-9xl font-black tracking-wider text-emerald-400 my-4">---</h2>
-            <p id="displayName" class="text-2xl sm:text-4xl font-extrabold text-white truncate max-w-full px-4">Menunggu Panggilan...</p>
-            <p id="displayLoket" class="text-lg sm:text-2xl text-slate-400 font-bold mt-3">Loket 1</p>
+            <h2 id="displayCurrent" class="text-7xl sm:text-9xl font-black tracking-wider text-white my-4">Selamat Datang</h2>
+            <p id="displayName" class="text-2xl sm:text-4xl font-extrabold text-slate-400 truncate max-w-full px-4">Silakan tunggu antrean dibuka</p>
         </div>
 
         <!-- Sisi Kanan: Antrean Berikutnya -->
@@ -79,7 +78,7 @@
 
                     const currentEl = document.getElementById("displayCurrent");
                     const nameEl = document.getElementById("displayName");
-                    const loketEl = document.getElementById("displayLoket");
+                    const headerEl = document.getElementById("statusHeader");
                     const waitingEl = document.getElementById("totalWaiting");
                     const nextListEl = document.getElementById("nextQueueList");
 
@@ -90,20 +89,28 @@
                     waitingEl.innerText = waitingList.length;
 
                     // Update Current Call (Sedang Dipanggil)
-                    if (data.current) {
+                    if (data.current && data.current.noAntrian) {
+                        headerEl.classList.remove("hidden");
                         currentEl.innerText = data.current.noAntrian;
+                        currentEl.classList.remove("text-white");
+                        currentEl.classList.add("text-emerald-400");
                         nameEl.innerText = data.current.nama;
-                        loketEl.innerText = data.current.loket || 'Loket 1';
+                        nameEl.classList.remove("text-slate-400");
+                        nameEl.classList.add("text-white");
 
                         // Trigger suara otomatis jika nomor antrean baru dipanggil
                         if (data.current.noAntrian !== lastCalledNumber) {
                             lastCalledNumber = data.current.noAntrian;
-                            speakVoice(data.current.noAntrian, data.current.loket || 'Loket 1');
+                            speakVoice(data.current.noAntrian);
                         }
                     } else {
-                        currentEl.innerText = "---";
-                        nameEl.innerText = "Menunggu Panggilan...";
-                        loketEl.innerText = "-";
+                        headerEl.classList.add("hidden");
+                        currentEl.innerText = "Selamat Datang";
+                        currentEl.classList.remove("text-emerald-400");
+                        currentEl.classList.add("text-white");
+                        nameEl.innerText = "Silakan tunggu antrean dibuka";
+                        nameEl.classList.remove("text-white");
+                        nameEl.classList.add("text-slate-400");
                     }
 
                     // Update 3 Antrean Berikutnya
@@ -114,7 +121,7 @@
                         waitingList.slice(0, 3).forEach(item => {
                             nextListEl.innerHTML += `
                                 <div class="p-3.5 box-element border-2 rounded-xl flex justify-between items-center shadow-sm">
-                                    <span class="text-lg font-black text-indigo-300">${item.noAntrian}</span>
+                                    <span class="text-lg font-black text-indigo-300">${item.noAntrean}</span>
                                     <span class="text-sm font-extrabold text-slate-200 truncate max-w-[180px]">${item.nama}</span>
                                 </div>
                             `;
@@ -124,13 +131,13 @@
                 .catch(err => console.error("Gagal memperbarui display:", err));
         }
 
-        // Fitur Suara Otomatis (Text-to-Speech Browser)
-        function speakVoice(noAntrian, loket) {
+        // Fitur Suara Otomatis (Tanpa menyebutkan loket)
+        function speakVoice(noAntrian) {
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             
             let cleanNo = noAntrian.toString().replace("-", " ");
-            let text = `Nomor antrian, ${cleanNo}, silakan menuju ke ${loket}`;
+            let text = `Nomor antrian, ${cleanNo}, silakan menuju ruangan.`;
             
             for (let i = 0; i < 2; i++) {
                 let utterance = new SpeechSynthesisUtterance(text);
