@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Universal Queue</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-100 font-sans min-h-screen p-6">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Panel Petugas / Kasir</h1>
+                <p class="text-sm text-slate-500">Kelola pemanggilan antrean toko</p>
+            </div>
+            <div>
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Online</span>
+            </div>
+        </div>
+
+        <!-- Kontrol Utama -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:col-span-1 text-center flex flex-col justify-between">
+                <div>
+                    <p class="text-sm text-slate-500 font-medium">Sedang Dipanggil</p>
+                    <h2 id="currentCall" class="text-6xl font-black text-indigo-600 my-4">-</h2>
+                    <p id="currentName" class="text-lg font-bold text-slate-800">-</p>
+                </div>
+                <div class="mt-6 space-y-3">
+                    <button onclick="callNext()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-100">
+                        Panggil Berikutnya (Next)
+                    </button>
+                    <button onclick="resetData()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-xl text-sm transition">
+                        Reset Antrean Hari Ini
+                    </button>
+                </div>
+            </div>
+
+            <!-- Daftar Antrean Menunggu -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 md:col-span-2">
+                <h3 class="font-bold text-slate-800 mb-4">Daftar Antrean Menunggu (<span id="waitingCount">0</span>)</h3>
+                <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 sticky top-0">
+                            <tr>
+                                <th class="p-3">No</th>
+                                <th class="p-3">Nama</th>
+                                <th class="p-3">Waktu Daftar</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueTableBody" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="4" class="text-center p-4 text-slate-400">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
+
+        function loadQueue() {
+            fetch(`${SCRIPT_URL}?action=getQueue`)
+                .then(res => res.json())
+                .then(data => {
+                    // Update current call
+                    if (data.current) {
+                        document.getElementById("currentCall").innerText = data.current.noAntrean;
+                        document.getElementById("currentName").innerText = data.current.nama;
+                    } else {
+                        document.getElementById("currentCall").innerText = "-";
+                        document.getElementById("currentName").innerText = "Tidak ada panggilan aktif";
+                    }
+
+                    // Update waiting count
+                    document.getElementById("waitingCount").innerText = data.waitingCount;
+
+                    // Update table list
+                    const tbody = document.getElementById("queueTableBody");
+                    tbody.innerHTML = "";
+                    
+                    const waitingList = data.list.filter(item => item.status === "menunggu");
+                    if (waitingList.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-slate-400">Belum ada antrean menunggu</td></tr>`;
+                        return;
+                    }
+
+                    waitingList.forEach(item => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-indigo-600">${item.noAntrean}</td>
+                                <td class="p-3 text-slate-800">${item.nama}</td>
+                                <td class="p-3 text-slate-500">${item.waktu}</td>
+                                <td class="p-3"><span class="px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded-md">Menunggu</span></td>
+                            </tr>
+                        `;
+                    });
+                });
+        }
+
+        function callNext() {
+            fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`)
+                .then(res => res.json())
+                .then(data => {
+                    loadQueue();
+                });
+        }
+
+        function resetData() {
+            if (confirm("Yakin ingin mereset seluruh antrean hari ini?")) {
+                fetch(`${SCRIPT_URL}?action=reset`)
+                    .then(res => res.json())
+                    .then(data => {
+                        loadQueue();
+                    });
+            }
+        }
+
+        // Auto Refresh tiap 3 detik
+        setInterval(loadQueue, 3000);
+        loadQueue();
+    </script>
+</body>
+</html>
