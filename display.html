@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Ruang Tunggu - Universal Queue</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-900 font-sans h-screen overflow-hidden flex flex-col justify-between p-8 text-white">
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider text-indigo-400">RUANG TUNGGU UTAMA</h1>
+            <p class="text-slate-400 text-sm">Silakan menunggu hingga nomor Anda dipanggil</p>
+        </div>
+        <div id="clock" class="text-xl font-mono text-slate-300">00:00:00</div>
+    </div>
+
+    <!-- Main Content (Landscape Split) -->
+    <div class="grid grid-cols-12 gap-8 my-auto">
+        <!-- Sisi Kiri: Nomor Utama yang Dipanggil -->
+        <div class="col-span-8 bg-slate-800/80 border border-slate-700 rounded-3xl p-12 flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 bg-indigo-600 px-6 py-2 rounded-br-2xl text-sm font-bold tracking-widest uppercase">
+                Sedang Dipanggil
+            </div>
+            <h2 id="displayCurrent" class="text-9xl font-black tracking-wider text-indigo-300 my-6">---</h2>
+            <p id="displayName" class="text-3xl font-semibold text-slate-200">Menunggu Panggilan...</p>
+            <p id="displayLoket" class="text-xl text-indigo-400 mt-2 font-medium"></p>
+        </div>
+
+        <!-- Sisi Kanan: Antrean Berikutnya -->
+        <div class="col-span-4 bg-slate-800/50 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-slate-400 mb-4 border-b border-slate-700 pb-2">Antrean Berikutnya</h3>
+                <div id="nextQueueList" class="space-y-3">
+                    <div class="p-4 bg-slate-800 rounded-2xl text-center text-slate-500">Belum ada antrean</div>
+                </div>
+            </div>
+            <div class="bg-indigo-950/40 border border-indigo-900/50 p-4 rounded-2xl text-center">
+                <p class="text-xs text-indigo-300 font-medium">Sisa Antrean Menunggu</p>
+                <p id="totalWaiting" class="text-3xl font-black text-indigo-400">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Running Text -->
+    <div class="border-t border-slate-800 pt-4 flex justify-between items-center text-xs text-slate-500">
+        <p>• Harap menjaga ketenangan di ruang tunggu • Perhatikan nomor antrean Anda di layar monitor •</p>
+        <p>Powered by Universal Queue SaaS</p>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
+        let lastCalledNumber = "";
+
+        // Jam Digital
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById("clock").innerText = now.toLocaleTimeString('id-ID');
+        }, 1000);
+
+        function updateDisplay() {
+            fetch(`${SCRIPT_URL}?action=getQueue`)
+                .then(res => res.json())
+                .then(data => {
+                    const currentEl = document.getElementById("displayCurrent");
+                    const nameEl = document.getElementById("displayName");
+                    const loketEl = document.getElementById("displayLoket");
+                    const waitingEl = document.getElementById("totalWaiting");
+                    const nextListEl = document.getElementById("nextQueueList");
+
+                    // Update total waiting
+                    waitingEl.innerText = data.waitingCount;
+
+                    // Update Current Call
+                    if (data.current) {
+                        currentEl.innerText = data.current.noAntrean;
+                        nameEl.innerText = data.current.nama;
+                        loketEl.innerText = `Menuju ke ${data.current.loket || 'Loket 1'}`;
+
+                        // Trigger suara jika nomor panggilan berubah
+                        if (data.current.noAntrean !== lastCalledNumber) {
+                            lastCalledNumber = data.current.noAntrean;
+                            speakVoice(data.current.noAntrean, data.current.loket || 'Loket 1');
+                        }
+                    } else {
+                        currentEl.innerText = "---";
+                        nameEl.innerText = "Menunggu Panggilan...";
+                        loketEl.innerText = "";
+                    }
+
+                    // Update Next Queue List (Ambil 3 antrean teratas yang menunggu)
+                    const waitingList = data.list.filter(item => item.status === "menunggu");
+                    nextListEl.innerHTML = "";
+                    
+                    if (waitingList.length === 0) {
+                        nextListEl.innerHTML = `<div class="p-4 bg-slate-800 rounded-2xl text-center text-slate-500">Antrean kosong</div>`;
+                    } else {
+                        waitingList.slice(0, 3).forEach(item => {
+                            nextListEl.innerHTML += `
+                                <div class="p-3 bg-slate-800/90 rounded-xl flex justify-between items-center">
+                                    <span class="text-xl font-bold text-indigo-300">${item.noAntrean}</span>
+                                    <span class="text-sm text-slate-300">${item.nama}</span>
+                                </div>
+                            `;
+                        });
+                    }
+                });
+        }
+
+        // Fitur Suara Otomatis (Text-to-Speech Browser)
+        function speakVoice(noAntrean, loket) {
+            if ('speechSynthesis' in window) {
+                // Format baca: "Nomor antrean, A 0 1, silakan menuju ke Loket 1"
+                const cleanNo = noAntrean.split('').join(' '); 
+                const text = `Nomor antrean, ${cleanNo}, silakan menuju ke ${loket}`;
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9; // Kecepatan agak pelan agar jelas
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Auto refresh tiap 3 detik
+        setInterval(updateDisplay, 3000);
+        updateDisplay();
+    </script>
+</body>
+</html>
