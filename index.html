@@ -321,9 +321,12 @@
 
                     if (foundInList) {
                         if (foundInList.status === "selesai") {
-                            statusInfoTextEl.innerText = "Status Anda:";
-                            displayWaitingEl.innerText = "SELESAI";
-                            unitOrangEl.style.display = "none";
+                            // Jika antrean selesai, hapus memori dan kembali ke menu awal secara otomatis
+                            localStorage.removeItem("my_queue_number");
+                            localStorage.removeItem("my_queue_name");
+                            alert("Layanan telah selesai. Terima kasih!");
+                            location.reload();
+                            return;
                         } else if (foundInList.status === "dipanggil") {
                             statusInfoTextEl.innerText = "Status Anda:";
                             displayWaitingEl.innerText = "GILIRAN ANDA!";
