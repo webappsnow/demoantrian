@@ -1,30 +1,66 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Petugas / Kasir - Universal Queue</title>
+    <title>Panel Petugas / Kasir - Enterprise Queue</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        /* Tema Gelap: Latar hitam pekat, teks putih bersih */
+        .dark body { background-color: #020617; color: #ffffff; }
+        .dark .glass-card { background: #0f172a; border: 2px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
+        .dark .box-element { background: #1e293b; border-color: #475569; color: #ffffff; }
+        .dark .btn-theme { background-color: #ffffff; color: #000000; }
+        
+        /* Tema Terang: Latar putih bersih, box putih bersih, teks hitam legam */
+        .light body { background-color: #f1f5f9; color: #000000; }
+        .light .glass-card { background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
+        .light .box-element { background: #ffffff; border-color: #cbd5e1; color: #000000; }
+        .light .btn-theme { background-color: #000000; color: #ffffff; }
+
+        .text-main { color: #000000; }
+        .dark .text-main { color: #ffffff; }
+        
+        .text-muted { color: #334155; }
+        .dark .text-muted { color: #cbd5e1; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-4 md:p-8 flex items-center justify-center">
-    <div class="max-w-4xl w-full space-y-6">
+<body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
+    
+    <div class="w-full max-w-4xl glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all space-y-6">
         
-        <!-- Header -->
-        <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
-            <div>
-                <h1 class="text-xl font-extrabold text-white tracking-tight">Panel Petugas / Kasir</h1>
-                <p class="text-sm text-slate-400 mt-0.5">Kelola pemanggilan antrean secara real-time</p>
-            </div>
+        <!-- Logo di Pojok Kiri Atas -->
+        <img src="logo.png" alt="Logo" class="absolute top-6 left-6 w-11 h-11 rounded-xl shadow-sm border dark:border-slate-600 light:border-slate-300 object-cover z-20" onerror="this.style.display='none'">
+
+        <!-- Tombol Ganti Tema di Pojok Kanan Atas -->
+        <button onclick="toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl border-2 dark:border-slate-600 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 z-20 cursor-pointer shadow-sm" title="Ganti Tema">
+            <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden dark:text-amber-400 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 dark:text-slate-200 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+        </button>
+
+        <!-- Header Panel -->
+        <div class="text-center sm:text-left pt-2 sm:pl-14">
+            <h2 class="text-lg font-black text-main tracking-tight">Klinik Sehat Utama</h2>
+            <h1 class="text-2xl font-black text-main mt-1">Panel Petugas / Kasir</h1>
+            <p class="text-muted text-xs sm:text-sm font-semibold mt-0.5">Kelola pemanggilan antrean secara real-time</p>
+        </div>
+
+        <!-- Indikator Sistem Aktif -->
+        <div class="box-element border-2 rounded-2xl p-4 flex justify-between items-center shadow-inner">
+            <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Status Server</span>
             <div class="flex items-center space-x-2">
                 <span class="relative flex h-3 w-3">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
-                <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-semibold rounded-full">Sistem Aktif</span>
+                <span class="px-3 py-1 box-element border-2 text-emerald-500 text-xs font-black rounded-full uppercase tracking-wider">Sistem Aktif</span>
             </div>
         </div>
 
@@ -32,44 +68,44 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             <!-- Kartu Panggilan Aktif -->
-            <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 md:col-span-1 text-center flex flex-col justify-between shadow-xl">
+            <div class="box-element border-2 rounded-3xl p-6 md:col-span-1 text-center flex flex-col justify-between shadow-sm">
                 <div>
-                    <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Sedang Dipanggil</p>
-                    <h2 id="currentCall" class="text-6xl font-black text-white tracking-wider my-4">-</h2>
-                    <p id="currentName" class="text-base font-semibold text-slate-300">-</p>
+                    <p class="text-xs uppercase tracking-widest text-muted font-black">Sedang Dipanggil</p>
+                    <h2 id="currentCall" class="text-6xl font-black text-main tracking-wider my-4">-</h2>
+                    <p id="currentName" class="text-base font-extrabold text-main">-</p>
                 </div>
                 <div class="mt-8 space-y-3">
-                    <button id="btnNext" onclick="callNext()" class="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-500/20 active:scale-[0.98]">
+                    <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-4 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
                         Panggil Berikutnya (Next)
                     </button>
-                    <button onclick="resetData()" class="w-full bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold py-3 rounded-2xl text-xs transition border border-slate-600/40">
+                    <button onclick="resetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80">
                         Reset Antrean Hari Ini
                     </button>
                 </div>
             </div>
 
             <!-- Daftar Antrean Menunggu -->
-            <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 md:col-span-2 shadow-xl flex flex-col">
+            <div class="box-element border-2 rounded-3xl p-6 md:col-span-2 shadow-sm flex flex-col">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-white text-sm uppercase tracking-wider">Daftar Antrean Menunggu</h3>
-                    <span class="px-2.5 py-1 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-bold rounded-xl">
+                    <h3 class="font-black text-main text-xs sm:text-sm uppercase tracking-wider">Daftar Antrean Menunggu</h3>
+                    <span class="px-3 py-1 box-element border-2 text-main text-xs font-black rounded-xl">
                         Total: <span id="waitingCount">0</span> orang
                     </span>
                 </div>
                 
                 <div class="overflow-x-auto max-h-72 overflow-y-auto pr-1">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-900/60 text-slate-400 sticky top-0 uppercase tracking-wider">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="box-element border-b-2 text-muted sticky top-0 uppercase tracking-wider font-black">
                             <tr>
-                                <th class="p-3.5 rounded-l-xl">No</th>
+                                <th class="p-3.5">No</th>
                                 <th class="p-3.5">Nama</th>
                                 <th class="p-3.5">Waktu Daftar</th>
-                                <th class="p-3.5 rounded-r-xl">Status</th>
+                                <th class="p-3.5">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="queueTableBody" class="divide-y divide-slate-700/40">
+                        <tbody id="queueTableBody" class="divide-y-2 dark:divide-slate-700 light:divide-slate-200">
                             <tr>
-                                <td colspan="4" class="text-center p-6 text-slate-500">Memuat data...</td>
+                                <td colspan="4" class="text-center p-6 text-muted font-bold">Memuat data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -78,13 +114,61 @@
 
         </div>
         
-        <div class="text-center text-xs text-slate-500">
-            Admin Dashboard - Universal Queue SaaS System
+        <div class="text-center text-xs font-black text-muted tracking-widest uppercase pt-2">
+            Enterprise Queue Management - Admin Panel
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const iconSun = document.getElementById("iconSun");
+            const iconMoon = document.getElementById("iconMoon");
+
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                html.classList.add("light");
+                localStorage.setItem("theme", "light");
+                iconSun.classList.remove("hidden");
+                iconMoon.classList.add("hidden");
+            } else {
+                html.classList.remove("light");
+                html.classList.add("dark");
+                localStorage.setItem("theme", "dark");
+                iconSun.classList.add("hidden");
+                iconMoon.classList.remove("hidden");
+            }
+        }
+
+        // Muat tema awal
+        (function() {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            const html = document.documentElement;
+            if (savedTheme === "light") {
+                html.classList.remove("dark");
+                html.classList.add("light");
+            } else {
+                html.classList.remove("light");
+                html.classList.add("dark");
+            }
+        })();
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            const iconSun = document.getElementById("iconSun");
+            const iconMoon = document.getElementById("iconMoon");
+
+            if (savedTheme === "light") {
+                iconSun.classList.remove("hidden");
+                iconMoon.classList.add("hidden");
+            } else {
+                iconSun.classList.add("hidden");
+                iconMoon.classList.remove("hidden");
+            }
+            loadQueue();
+        });
 
         function loadQueue() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
@@ -92,7 +176,6 @@
                 .then(data => {
                     if (!data) return;
 
-                    // Update antrean yang sedang dipanggil
                     if (data.current) {
                         document.getElementById("currentCall").innerText = data.current.noAntrian;
                         document.getElementById("currentName").innerText = data.current.nama;
@@ -101,27 +184,25 @@
                         document.getElementById("currentName").innerText = "Tidak ada panggilan aktif";
                     }
 
-                    // Update jumlah menunggu
                     document.getElementById("waitingCount").innerText = data.waitingCount || 0;
 
-                    // Update tabel daftar menunggu
                     const tbody = document.getElementById("queueTableBody");
                     tbody.innerHTML = "";
                     
                     const waitingList = data.list ? data.list.filter(item => item.status === "menunggu") : [];
                     
                     if (waitingList.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-slate-500">Belum ada antrean menunggu</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-muted font-bold">Belum ada antrean menunggu</td></tr>`;
                         return;
                     }
 
                     waitingList.forEach(item => {
                         tbody.innerHTML += `
-                            <tr class="hover:bg-slate-700/30 transition">
-                                <td class="p-3.5 font-extrabold text-indigo-400 text-sm">${item.noAntrian}</td>
-                                <td class="p-3.5 text-slate-200 font-medium">${item.nama}</td>
-                                <td class="p-3.5 text-slate-400">${item.waktu}</td>
-                                <td class="p-3.5"><span class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] uppercase tracking-wider rounded-md font-semibold">Menunggu</span></td>
+                            <tr class="transition">
+                                <td class="p-3.5 font-black text-main text-sm sm:text-base">${item.noAntrian}</td>
+                                <td class="p-3.5 text-main font-extrabold">${item.nama}</td>
+                                <td class="p-3.5 text-muted font-bold">${item.waktu}</td>
+                                <td class="p-3.5"><span class="px-2.5 py-1 box-element border-2 text-main text-[10px] sm:text-xs uppercase tracking-wider rounded-lg font-black">Menunggu</span></td>
                             </tr>
                         `;
                     });
