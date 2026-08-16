@@ -28,6 +28,26 @@
 </head>
 <body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
     
+    <!-- Modern Custom Modal / Popup (Menggantikan alert/confirm bawaan browser) -->
+    <div id="customModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-sm glass-card rounded-3xl p-6 text-center border-2 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
+            <div id="modalIconContainer" class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <h3 id="modalTitle" class="text-lg font-black text-main">Informasi</h3>
+                <p id="modalMessage" class="text-xs sm:text-sm text-muted font-bold mt-2">Pesan informasi sistem.</p>
+            </div>
+            <div id="modalButtonContainer" class="space-y-2">
+                <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
+                    OK, Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="w-full max-w-4xl glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all space-y-6">
         
         <!-- Logo di Pojok Kiri Atas -->
@@ -85,7 +105,7 @@
                         </svg>
                         <span>Unduh Rekap Excel</span>
                     </button>
-                    <button onclick="resetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80">
+                    <button onclick="confirmResetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80">
                         Reset Antrian Hari Ini
                     </button>
                 </div>
@@ -128,6 +148,42 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
+        let modalCallback = null;
+
+        function showModal(title, message, callback = null, isConfirm = false) {
+            document.getElementById("modalTitle").innerText = title;
+            document.getElementById("modalMessage").innerText = message;
+            document.getElementById("customModal").classList.remove("hidden");
+            modalCallback = callback;
+
+            const btnContainer = document.getElementById("modalButtonContainer");
+            if (isConfirm) {
+                btnContainer.innerHTML = `
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="closeModal()" class="w-full box-element border-2 font-black py-3 rounded-xl text-xs hover:opacity-80 transition cursor-pointer">Batal</button>
+                        <button onclick="executeConfirm()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-md">Ya, Lanjutkan</button>
+                    </div>
+                `;
+            } else {
+                btnContainer.innerHTML = `
+                    <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
+                        OK, Mengerti
+                    </button>
+                `;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("customModal").classList.add("hidden");
+            modalCallback = null;
+        }
+
+        function executeConfirm() {
+            if (modalCallback) {
+                modalCallback();
+            }
+            closeModal();
+        }
 
         function toggleTheme() {
             const html = document.documentElement;
@@ -303,16 +359,15 @@
                 });
         }
 
-      function downloadExcel() {
+        function downloadExcel() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     if (!data || !data.list || data.list.length === 0) {
-                        alert("Tidak ada data pengunjung untuk diunduh hari ini.");
+                        showModal("Informasi", "Tidak ada data pengunjung untuk diunduh hari ini.");
                         return;
                     }
 
-                    // Menggunakan titik koma (;) agar otomatis terpisah per kolom di Excel wilayah Indonesia
                     let csvContent = "\uFEFFNo Antrian;Nama;Telepon;Status;Waktu;Loket\n";
 
                     data.list.forEach(item => {
@@ -325,7 +380,6 @@
                             `"${waktuBersih}"`,
                             `"${item.loket || '-'}"`
                         ];
-                        // Menggabungkan menggunakan titik koma (;)
                         csvContent += rowData.join(";") + "\n";
                     });
 
@@ -343,19 +397,19 @@
                 })
                 .catch(err => {
                     console.error("Gagal mengunduh data:", err);
-                    alert("Gagal mengunduh rekap data.");
+                    showModal("Gagal", "Gagal mengunduh rekap data.");
                 });
         }
 
-        function resetData() {
-            if (confirm("Yakin ingin mereset seluruh antrian hari ini? Data di Google Sheets akan dikosongkan.")) {
+        function confirmResetData() {
+            showModal("Konfirmasi Reset", "Yakin ingin mereset seluruh antrian hari ini? Data di Google Sheets akan dikosongkan.", () => {
                 fetch(`${SCRIPT_URL}?action=reset`, { method: "GET", redirect: "follow" })
                     .then(res => res.json())
                     .then(data => {
-                        alert("Antrian berhasil direset!");
+                        showModal("Berhasil", "Antrian berhasil direset!");
                         loadQueue();
                     });
-            }
+            }, true);
         }
 
         // Auto Refresh tiap 4 detik
