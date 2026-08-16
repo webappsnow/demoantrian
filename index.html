@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ambil Antrian Online</title>
+    <title>Sistem Antrian Digital</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -46,7 +46,7 @@
             <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
                 <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Nomor Antrian Anda</p>
-                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">Memuat...</h2>
+                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">-</h2>
                 <p id="displayName" class="text-slate-300 font-medium"></p>
             </div>
 
@@ -65,7 +65,7 @@
             <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Daftar Status Antrian Live</p>
                 <div class="max-h-40 overflow-y-auto space-y-2 pr-1" id="liveQueueList">
-                    <p class="text-xs text-slate-500 text-center py-2">Memuat daftar antrian...</p>
+                    <!-- List dirender secara otomatis oleh JavaScript -->
                 </div>
             </div>
 
@@ -84,6 +84,7 @@
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
 
+        // Cek sesi lokal saat halaman dimuat
         window.addEventListener("DOMContentLoaded", () => {
             if (myRegisteredQueueNo) {
                 document.getElementById("formContainer").classList.add("hidden");
@@ -112,6 +113,7 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
+            // Ambil data untuk menentukan nomor urut antrian berikutnya secara presisi
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -137,6 +139,7 @@
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
+                    // Kirim data pendaftaran ke Google Sheets di latar belakang
                     fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                         method: "GET",
                         mode: "no-cors"
@@ -170,17 +173,14 @@
                 .then(res => res.json())
                 .then(data => {
                     const listContainer = document.getElementById("liveQueueList");
-                    
-                    if (!data || !data.list) return;
+                    listContainer.innerHTML = ""; // Bersihkan kontainer list
 
-                    // Bersihkan kontainer list di awal agar teks "memuat" hilang total
-                    listContainer.innerHTML = ""; 
-
-                    if (data.list.length === 0) {
+                    if (!data || !data.list || data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
                         return;
                     }
 
+                    // Sinkronisasi ulang nama jika sesi lokal berbeda
                     let savedName = localStorage.getItem("my_queue_name");
                     if (savedName && (!myRegisteredQueueNo || !data.list.some(item => item.noAntrian === myRegisteredQueueNo))) {
                         let matched = data.list.slice().reverse().find(item => item.nama && item.nama.trim().toLowerCase() === savedName.trim().toLowerCase());
@@ -188,13 +188,10 @@
                             myRegisteredQueueNo = matched.noAntrian;
                             localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                             document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                        } else if (data.list.length > 0) {
-                            myRegisteredQueueNo = data.list[data.list.length - 1].noAntrian;
-                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
-                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                         }
                     }
 
+                    // Hitung sisa antrian di depan
                     let waitingList = data.list.filter(item => item.status === "menunggu");
                     let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
                     let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
@@ -217,6 +214,7 @@
                         }
                     }
 
+                    // Render daftar antrian ke layar
                     data.list.forEach(item => {
                         let badgeColor = "bg-slate-800 text-slate-400";
                         let statusText = item.status;
