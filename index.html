@@ -12,28 +12,28 @@
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 font-sans min-h-screen flex items-center justify-center p-4">
     
-    <div class="max-w-md w-full bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8 text-white">
+    <div class="max-w-md w-full bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 md:p-8 text-white">
         <!-- Header Brand -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-6">
             <div class="inline-block p-3 bg-indigo-500/20 border border-indigo-500/30 rounded-2xl mb-3 text-indigo-400">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
             <h1 class="text-2xl font-extrabold tracking-tight">Sistem Antrean Digital</h1>
-            <p class="text-slate-400 text-sm mt-1">Ambil nomor antrean Anda dari mana saja tanpa harus antre berdiri di lokasi.</p>
+            <p class="text-slate-400 text-sm mt-1">Ambil nomor antrean Anda dari mana saja.</p>
         </div>
 
         <!-- Form Pendaftaran -->
         <div id="formContainer">
-            <form id="queueForm" class="space-y-5">
+            <form id="queueForm" class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Nama Lengkap</label>
-                    <input type="text" id="nama" required class="w-full px-4 py-3.5 bg-slate-800/60 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition" placeholder="Contoh: Sarah Wijaya">
+                    <input type="text" id="nama" required class="w-full px-4 py-3.5 bg-slate-800/60 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="Contoh: Sarah Wijaya">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Nomor WhatsApp <span class="text-slate-500 font-normal">(Opsional)</span></label>
-                    <input type="tel" id="telepon" class="w-full px-4 py-3.5 bg-slate-800/60 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition" placeholder="Contoh: 08123456789">
+                    <input type="tel" id="telepon" class="w-full px-4 py-3.5 bg-slate-800/60 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="Contoh: 08123456789">
                 </div>
                 <button type="submit" id="btnSubmit" class="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-500/25 active:scale-[0.98]">
                     Ambil Nomor Antrean Sekarang
@@ -41,19 +41,19 @@
             </form>
         </div>
 
-        <!-- Kartu Hasil Sukses (Live Status) -->
-        <div id="resultContainer" class="hidden text-center space-y-6">
-            <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-3xl p-6 relative overflow-hidden">
+        <!-- Kartu Hasil Sukses & Live Status -->
+        <div id="resultContainer" class="hidden space-y-5">
+            <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
                 <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Nomor Antrean Anda</p>
-                <h2 id="displayNo" class="text-6xl font-black text-white tracking-wider my-3">A-001</h2>
-                <p id="displayName" class="text-slate-300 font-medium text-lg"></p>
+                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">A-001</h2>
+                <p id="displayName" class="text-slate-300 font-medium"></p>
             </div>
 
             <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
                 <div class="text-left">
                     <p class="text-xs text-slate-400">Sisa Antrean di Depan</p>
-                    <p class="text-sm font-semibold text-slate-200">Estimasi Real-time</p>
+                    <p id="statusInfoText" class="text-sm font-semibold text-indigo-300">Memuat status...</p>
                 </div>
                 <div class="text-right">
                     <span id="displayWaiting" class="text-2xl font-black text-indigo-400">0</span>
@@ -61,16 +61,20 @@
                 </div>
             </div>
 
-            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-xs leading-relaxed">
-                💡 Biarkan halaman ini tetap terbuka di HP Anda untuk memantau pergerakan antrean secara otomatis.
+            <!-- Daftar Status Antrean Secara Live -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Daftar Status Antrean Live</p>
+                <div class="max-h-40 overflow-y-auto space-y-2 pr-1" id="liveQueueList">
+                    <!-- Data masuk lewat JS -->
+                </div>
             </div>
 
-            <button onclick="location.reload()" class="text-xs text-slate-400 hover:text-white underline transition">
-                Ambil Antrean Baru / Selesai
-            </button>
+            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-xs text-center leading-relaxed">
+                🔒 Tombol dikunci. Anda sudah terdaftar dalam antrean.
+            </div>
         </div>
         
-        <div class="text-center mt-8 text-xs text-slate-500">
+        <div class="text-center mt-6 text-xs text-slate-500">
             Powered by Universal Queue SaaS System
         </div>
     </div>
@@ -91,16 +95,19 @@
             fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`)
                 .then(res => res.json())
                 .then(data => {
+                    // Sembunyikan form agar tidak bisa submit lagi (Disabled / Locked)
                     document.getElementById("formContainer").classList.add("hidden");
                     document.getElementById("resultContainer").classList.remove("hidden");
+                    
                     document.getElementById("displayNo").innerText = data.noAntrean;
                     document.getElementById("displayName").innerText = data.nama;
                     
-                    fetchStatusInfo(data.noAntrean);
+                    // Ambil status pertama kali & jalankan interval live update
+                    fetchAllQueueStatus(data.noAntrean);
 
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(() => {
-                        fetchStatusInfo(data.noAntrean);
+                        fetchAllQueueStatus(data.noAntrean);
                     }, 4000);
                 })
                 .catch(err => {
@@ -110,7 +117,7 @@
                 });
         });
 
-        function fetchStatusInfo(myQueueNo) {
+        function fetchAllQueueStatus(myQueueNo) {
             fetch(`${SCRIPT_URL}?action=getQueue`)
                 .then(res => res.json())
                 .then(data => {
@@ -120,16 +127,61 @@
                     let peopleAhead = 0;
                     if (myIndex !== -1) {
                         peopleAhead = myIndex;
+                        document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
                     } else {
                         if (data.current && data.current.noAntrean === myQueueNo) {
-                            document.getElementById("displayWaiting").innerText = "Giliran Anda!";
-                            return;
+                            peopleAhead = 0;
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "GILIRAN ANDA!";
                         } else {
                             peopleAhead = 0;
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "SELESAI";
                         }
                     }
 
-                    document.getElementById("displayWaiting").innerText = peopleAhead;
+                    if (myIndex !== -1) {
+                        document.getElementById("displayWaiting").innerText = peopleAhead;
+                    }
+
+                    // Render daftar list antrean live di HP customer
+                    const listContainer = document.getElementById("liveQueueList");
+                    listContainer.innerHTML = "";
+
+                    if (data.list.length === 0) {
+                        listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrean</p>`;
+                        return;
+                    }
+
+                    data.list.forEach(item => {
+                        let badgeColor = "bg-slate-800 text-slate-400";
+                        let statusText = item.status;
+
+                        if (item.status === "menunggu") {
+                            badgeColor = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                            statusText = "Menunggu";
+                        } else if (item.status === "dipanggil") {
+                            badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
+                            statusText = "Dipanggil (" + (item.loket || 'Loket') + ")";
+                        } else if (item.status === "selesai") {
+                            badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                            statusText = "Selesai";
+                        }
+
+                        // Tandai nomor milik user sendiri agar mencolok
+                        let isMyNumber = (item.noAntrean === myQueueNo);
+                        let cardHighlight = isMyNumber ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 bg-slate-900/50";
+
+                        listContainer.innerHTML += `
+                            <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-extrabold text-white text-sm">${item.noAntrean}</span>
+                                    <span class="text-slate-300 truncate max-w-[120px]">${item.nama} ${isMyNumber ? '(Anda)' : ''}</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider ${badgeColor}">${statusText}</span>
+                            </div>
+                        `;
+                    });
                 });
         }
     </script>
