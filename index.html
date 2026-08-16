@@ -147,8 +147,7 @@
                     fetchAllQueueStatus();
                 });
         });
-
-        function fetchAllQueueStatus() {
+function fetchAllQueueStatus() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -176,7 +175,7 @@
                     }
 
                     const listContainer = document.getElementById("liveQueueList");
-                    listContainer.innerHTML = "";
+                    listContainer.innerHTML = ""; // <-- Ini wajib ada agar tulisan "Memuat..." terhapus bersih
 
                     if (data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
