@@ -46,7 +46,7 @@
             <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-3xl p-6 text-center relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
                 <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Nomor Antrian Anda</p>
-                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">-</h2>
+                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">Memuat...</h2>
                 <p id="displayName" class="text-slate-300 font-medium"></p>
             </div>
 
@@ -93,122 +93,128 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // 1. Kirim data menggunakan mode no-cors agar masuk ke Spreadsheet
-            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
-                method: "GET",
-                mode: "no-cors"
-            })
-            .then(() => {
-                // 2. Beri jeda 1.5 detik agar Google Sheets selesai menulis baris baru
-                setTimeout(() => {
+            // 1. Ambil data server dulu sebentar untuk tahu nomor terakhir, atau langsung hitung dari total list
+            fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    let nextNum = 1;
+                    if (data && data.list && data.list.length > 0) {
+                        // Cari nomor urut terbesar dari daftar yang ada
+                        let maxNum = 0;
+                        data.list.forEach(item => {
+                            let parsed = parseInt(item.noAntrian.toString().replace(/\D/g, ''));
+                            if (!isNaN(parsed) && parsed > maxNum) {
+                                maxNum = parsed;
+                            }
+                        });
+                        nextNum = maxNum + 1;
+                    }
+
+                    myRegisteredQueueNo = "A-" + ("000" + nextNum).slice(-3);
+
+                    // Tampilkan langsung di layar seketika tanpa menunggu lama
                     document.getElementById("formContainer").classList.add("hidden");
                     document.getElementById("resultContainer").classList.remove("hidden");
+                    document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
-                    
-                    // Tarik data antrian untuk mencocokkan nomor terbaru
-                    fetchQueueDataAndSync(nama);
 
+                    // 2. Kirim data pendaftaran ke Google Sheets di latar belakang
+                    fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                        method: "GET",
+                        mode: "no-cors"
+                    });
+
+                    // 3. Jalankan pemantauan live status berkala
+                    fetchAllQueueStatus();
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(() => {
-                        fetchQueueDataAndSync(nama);
+                        fetchAllQueueStatus();
                     }, 4000);
-                }, 1500);
-            })
-            .catch(() => {
-                alert("Terjadi kesalahan jaringan.");
-                btn.disabled = false;
-                btn.innerText = "Ambil Nomor Antrian";
-            });
+                })
+                .catch(() => {
+                    // Fallback darurat jika fetch getQueue awal gagal
+                    myRegisteredQueueNo = "A-001";
+                    document.getElementById("formContainer").classList.add("hidden");
+                    document.getElementById("resultContainer").classList.remove("hidden");
+                    document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                    document.getElementById("displayName").innerText = nama;
+
+                    fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                        method: "GET",
+                        mode: "no-cors"
+                    });
+
+                    fetchAllQueueStatus();
+                });
         });
 
-       function fetchQueueDataAndSync(targetNama) {
-            fetch(`${SCRIPT_URL}?action=getQueue`, {
-                method: "GET",
-                redirect: "follow"
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data || !data.list || data.list.length === 0) return;
+        function fetchAllQueueStatus() {
+            fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || !data.list) return;
 
-                // Jika nomor antrian lokal belum ada, cari otomatis
-                if (!myRegisteredQueueNo) {
-                    // 1. Cari berdasarkan nama yang diinput (abaikan huruf besar/kecil)
-                    let found = data.list.slice().reverse().find(item => item.nama && item.nama.trim().toLowerCase() === targetNama.trim().toLowerCase());
-                    
-                    if (found) {
-                        myRegisteredQueueNo = found.noAntrian;
-                    } else {
-                        // 2. Jika nama tidak pas, ambil baris paling bawah/terakhir di spreadsheet sebagai nomor milik user
-                        let lastItem = data.list[data.list.length - 1];
-                        if (lastItem) {
-                            myRegisteredQueueNo = lastItem.noAntrian;
-                        }
-                    }
-
-                    // Tampilkan nomor antrian ke layar jika sudah didapatkan
                     if (myRegisteredQueueNo) {
-                        document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                    }
-                }
+                        let waitingList = data.list.filter(item => item.status === "menunggu");
+                        let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
+                        let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
 
-                // Update tampilan sisa antrian di depan
-                if (myRegisteredQueueNo) {
-                    let waitingList = data.list.filter(item => item.status === "menunggu");
-                    let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
-                    let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
-
-                    if (foundInList) {
-                        if (foundInList.status === "selesai") {
-                            document.getElementById("statusInfoText").innerText = "Status Anda:";
-                            document.getElementById("displayWaiting").innerText = "SELESAI";
-                        } else if (foundInList.status === "dipanggil") {
-                            document.getElementById("statusInfoText").innerText = "Status Anda:";
-                            document.getElementById("displayWaiting").innerText = "GILIRAN!";
-                        } else {
-                            if (myIndex !== -1) {
-                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
-                                document.getElementById("displayWaiting").innerText = myIndex;
+                        if (foundInList) {
+                            if (foundInList.status === "selesai") {
+                                document.getElementById("statusInfoText").innerText = "Status Anda:";
+                                document.getElementById("displayWaiting").innerText = "SELESAI";
+                            } else if (foundInList.status === "dipanggil") {
+                                document.getElementById("statusInfoText").innerText = "Status Anda:";
+                                document.getElementById("displayWaiting").innerText = "GILIRAN!";
+                            } else {
+                                if (myIndex !== -1) {
+                                    document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
+                                    document.getElementById("displayWaiting").innerText = myIndex;
+                                }
                             }
                         }
                     }
-                }
 
-                // Render daftar seluruh antrian secara live
-                const listContainer = document.getElementById("liveQueueList");
-                listContainer.innerHTML = "";
+                    const listContainer = document.getElementById("liveQueueList");
+                    listContainer.innerHTML = "";
 
-                data.list.forEach(item => {
-                    let badgeColor = "bg-slate-800 text-slate-400";
-                    let statusText = item.status;
-
-                    if (item.status === "menunggu") {
-                        badgeColor = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
-                        statusText = "Menunggu";
-                    } else if (item.status === "dipanggil") {
-                        badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
-                        statusText = "Dipanggil";
-                    } else if (item.status === "selesai") {
-                        badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-                        statusText = "Selesai";
+                    if (data.list.length === 0) {
+                        listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
+                        return;
                     }
 
-                    let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
-                    let cardHighlight = isMyNumber ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 bg-slate-900/50";
+                    data.list.forEach(item => {
+                        let badgeColor = "bg-slate-800 text-slate-400";
+                        let statusText = item.status;
 
-                    listContainer.innerHTML += `
-                        <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs">
-                            <div class="flex items-center space-x-2">
-                                <span class="font-extrabold text-white text-sm">${item.noAntrian}</span>
-                                <span class="text-slate-300 truncate max-w-[120px]">${item.nama} ${isMyNumber ? '(Anda)' : ''}</span>
+                        if (item.status === "menunggu") {
+                            badgeColor = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                            statusText = "Menunggu";
+                        } else if (item.status === "dipanggil") {
+                            badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
+                            statusText = "Dipanggil";
+                        } else if (item.status === "selesai") {
+                            badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                            statusText = "Selesai";
+                        }
+
+                        let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
+                        let cardHighlight = isMyNumber ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 bg-slate-900/50";
+
+                        listContainer.innerHTML += `
+                            <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-extrabold text-white text-sm">${item.noAntrian}</span>
+                                    <span class="text-slate-300 truncate max-w-[120px]">${item.nama} ${isMyNumber ? '(Anda)' : ''}</span>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider ${badgeColor}">${statusText}</span>
                             </div>
-                            <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider ${badgeColor}">${statusText}</span>
-                        </div>
-                    `;
+                        `;
+                    });
+                })
+                .catch(err => {
+                    console.error("Gagal menarik data:", err);
                 });
-            })
-            .catch(err => {
-                console.error("Gagal menarik data:", err);
-            });
         }
     </script>
 </body>
