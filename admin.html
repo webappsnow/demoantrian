@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Petugas / Kasir - Enterprise Queue</title>
+    <title>Panel Admin - Enterprise Queue</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -46,7 +46,7 @@
         <!-- Header Panel -->
         <div class="text-center sm:text-left pt-2 sm:pl-14">
             <h2 class="text-lg font-black text-main tracking-tight">Klinik Sehat Utama</h2>
-            <h1 class="text-2xl font-black text-main mt-1">Panel Petugas / Kasir</h1>
+            <h1 class="text-2xl font-black text-main mt-1">Panel Admin</h1>
             <p class="text-muted text-xs sm:text-sm font-semibold mt-0.5">Kelola pemanggilan antrian secara real-time</p>
         </div>
 
@@ -65,11 +65,10 @@
         <!-- Kontrol Utama -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <!-- Kartu Panggilan Aktif (Nomor Antrian Dibuat Responsif & Tidak Kepotong) -->
+            <!-- Kartu Panggilan Aktif -->
             <div class="box-element border-2 rounded-3xl p-6 md:col-span-1 text-center flex flex-col justify-between shadow-sm">
                 <div>
                     <p class="text-xs uppercase tracking-widest text-muted font-black">Sedang Dipanggil</p>
-                    <!-- Menggunakan text-4xl sm:text-5xl dan truncate agar aman dari terpotong ke bawah -->
                     <h2 id="currentCall" class="text-4xl sm:text-5xl font-black text-main tracking-wider my-4 truncate px-1">-</h2>
                     <p id="currentName" class="text-xs sm:text-sm font-extrabold text-main px-1 leading-snug truncate">-</p>
                 </div>
@@ -79,6 +78,12 @@
                     </button>
                     <button id="btnSkip" onclick="skipCurrent()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm">
                         Lewati (Skip)
+                    </button>
+                    <button onclick="downloadExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        <span>Unduh Rekap Excel</span>
                     </button>
                     <button onclick="resetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80">
                         Reset Antrian Hari Ini
@@ -295,6 +300,48 @@
                 })
                 .catch(err => {
                     console.error("Gagal memanggil ulang:", err);
+                });
+        }
+
+        function downloadExcel() {
+            fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    if (!data || !data.list || data.list.length === 0) {
+                        alert("Tidak ada data pengunjung untuk diunduh hari ini.");
+                        return;
+                    }
+
+                    let csvContent = "\uFEFFNo Antrian,Nama,Telepon,Status,Waktu,Loket\n";
+
+                    data.list.forEach(item => {
+                        let waktuBersih = formatWaktuAman(item.waktu);
+                        let rowData = [
+                            `"${item.noAntrian || ''}"`,
+                            `"${item.nama || ''}"`,
+                            `"${item.telepon || '-'}"`,
+                            `"${item.status || ''}"`,
+                            `"${waktuBersih}"`,
+                            `"${item.loket || '-'}"`
+                        ];
+                        csvContent += rowData.join(",") + "\n";
+                    });
+
+                    let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    let url = URL.createObjectURL(blob);
+                    let a = document.createElement('a');
+                    a.setAttribute('href', url);
+                    
+                    let todayStr = new Date().toISOString().slice(0, 10);
+                    a.setAttribute('download', `Rekap_Antrian_${todayStr}.csv`);
+                    
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                })
+                .catch(err => {
+                    console.error("Gagal mengunduh data:", err);
+                    alert("Gagal mengunduh rekap data.");
                 });
         }
 
