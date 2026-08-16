@@ -97,7 +97,7 @@
             }
         });
 
-        document.getElementById("queueForm").addEventListener("submit", function(e) {
+    document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
             
             if (localStorage.getItem("my_queue_number")) {
@@ -113,7 +113,6 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // Ambil data untuk menentukan nomor urut antrian berikutnya secara presisi
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -139,13 +138,17 @@
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
-                    // Kirim data pendaftaran ke Google Sheets di latar belakang
+                    // 1. Kirim data pendaftaran ke Google Sheets di latar belakang
                     fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                         method: "GET",
                         mode: "no-cors"
                     });
 
-                    fetchAllQueueStatus();
+                    // 2. Beri jeda 1,5 detik agar Google Sheets selesai menulis baris baru, baru tarik datanya
+                    setTimeout(() => {
+                        fetchAllQueueStatus();
+                    }, 1500);
+
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
                 })
@@ -164,7 +167,12 @@
                         mode: "no-cors"
                     });
 
-                    fetchAllQueueStatus();
+                    setTimeout(() => {
+                        fetchAllQueueStatus();
+                    }, 1500);
+
+                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
                 });
         });
 
