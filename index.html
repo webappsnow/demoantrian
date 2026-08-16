@@ -3,88 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Antrian Digital</title>
+    <title>Sistem Antrian Digital Profesional</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .glow-effect {
+            box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.3);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 font-sans min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#030712] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))] text-slate-100 min-h-screen flex items-center justify-center p-4 sm:p-6">
     
-    <div class="max-w-md w-full bg-white/10 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-6 md:p-8 text-white">
+    <div class="max-w-md w-full glass-card rounded-[2.5rem] p-7 sm:p-9 relative overflow-hidden glow-effect">
+        <!-- Dekorasi Cahaya Latar -->
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-violet-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
         <!-- Header Brand -->
-        <div class="text-center mb-6">
-            <div class="inline-block p-3 bg-indigo-500/20 border border-indigo-500/30 rounded-2xl mb-3 text-indigo-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="text-center mb-8 relative z-10">
+            <div class="inline-flex items-center justify-center p-3.5 bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 rounded-2xl mb-4 text-indigo-400 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h1 class="text-2xl font-extrabold tracking-tight">Sistem Antrian Digital</h1>
-            <p class="text-slate-400 text-sm mt-1">Ambil nomor antrian Anda dari mana saja.</p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Antrian Digital</h1>
+            <p class="text-slate-400 text-xs sm:text-sm mt-1.5 font-medium">Ambil nomor antrian Anda secara praktis & real-time</p>
         </div>
 
         <!-- Form Pendaftaran -->
-        <div id="formContainer">
+        <div id="formContainer" class="relative z-10">
             <form id="queueForm" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Nama Lengkap</label>
-                    <input type="text" id="nama" required class="w-full px-4 py-3.5 bg-slate-800/60 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="Contoh: Sarah Wijaya">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Nama Lengkap</label>
+                    <input type="text" id="nama" required class="w-full px-4 py-3.5 bg-slate-900/80 border border-slate-700/80 rounded-2xl text-white placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition font-medium text-sm" placeholder="Contoh: Sarah Wijaya">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Nomor WhatsApp <span class="text-slate-500 font-normal">(Opsional)</span></label>
-                    <input type="tel" id="telepon" class="w-full px-4 py-3.5 bg-slate-800/60 border border-slate-700 rounded-2xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="Contoh: 08123456789">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">Nomor WhatsApp <span class="text-slate-600 font-normal">(Opsional)</span></label>
+                    <input type="tel" id="telepon" class="w-full px-4 py-3.5 bg-slate-900/80 border border-slate-700/80 rounded-2xl text-white placeholder-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition font-medium text-sm" placeholder="Contoh: 08123456789">
                 </div>
-                <button type="submit" id="btnSubmit" class="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-500/25 active:scale-[0.98]">
+                <button type="submit" id="btnSubmit" class="w-full mt-2 bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-indigo-500/25 active:scale-[0.98] text-sm tracking-wide">
                     Ambil Nomor Antrian
                 </button>
             </form>
         </div>
 
         <!-- Kartu Hasil Sukses & Live Status -->
-        <div id="resultContainer" class="hidden space-y-5">
-            <div class="bg-indigo-950/60 border border-indigo-500/30 rounded-3xl p-6 text-center relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-                <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Nomor Antrian Anda</p>
-                <h2 id="displayNo" class="text-5xl font-black text-white tracking-wider my-2">-</h2>
-                <p id="displayName" class="text-slate-300 font-medium"></p>
+        <div id="resultContainer" class="hidden space-y-5 relative z-10">
+            <div class="bg-gradient-to-b from-indigo-950/60 to-slate-900/80 border border-indigo-500/30 rounded-3xl p-6 text-center relative overflow-hidden shadow-inner">
+                <div class="absolute -right-12 -top-12 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl"></div>
+                <span class="inline-block px-3 py-1 bg-indigo-500/20 border border-indigo-500/30 rounded-full text-[10px] font-extrabold tracking-widest uppercase text-indigo-300 mb-2">Tiket Aktif Anda</span>
+                <h2 id="displayNo" class="text-5xl sm:text-6xl font-black text-white tracking-tight my-1 drop-shadow-md">-</h2>
+                <p id="displayName" class="text-slate-300 font-semibold text-sm mt-1"></p>
             </div>
 
-            <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
                 <div class="text-left">
-                    <p class="text-xs text-slate-400">Sisa Antrian di Depan</p>
-                    <p id="statusInfoText" class="text-sm font-semibold text-indigo-300">Estimasi Real-time</p>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sisa Antrian Di Depan</p>
+                    <p id="statusInfoText" class="text-xs font-semibold text-indigo-400 mt-0.5">Estimasi Real-time</p>
                 </div>
                 <div class="text-right">
-                    <span id="displayWaiting" class="text-2xl font-black text-indigo-400">0</span>
-                    <span class="text-xs text-slate-400 ml-1">orang</span>
+                    <span id="displayWaiting" class="text-3xl font-black text-white">0</span>
+                    <span class="text-xs text-slate-400 font-medium ml-1">orang</span>
                 </div>
             </div>
 
             <!-- Daftar Status Antrian Secara Live -->
-            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Daftar Status Antrian Live</p>
-                <div class="max-h-40 overflow-y-auto space-y-2 pr-1" id="liveQueueList">
+            <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-4 shadow-inner">
+                <div class="flex items-center justify-between mb-3 px-1">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Live Status Antrian</p>
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                </div>
+                <div class="max-h-44 overflow-y-auto space-y-2 pr-1 scrollbar-thin" id="liveQueueList">
                     <!-- List dirender secara otomatis oleh JavaScript -->
                 </div>
             </div>
 
-            <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-300 text-xs text-center leading-relaxed">
-                Anda sudah berada di dalam antrian. Silakan pantau daftar di atas.
+            <div class="p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-300 text-xs text-center font-medium leading-relaxed">
+                Anda sudah terdaftar di dalam sistem. Silakan pantau status antrean Anda di atas.
             </div>
         </div>
         
-        <div class="text-center mt-6 text-xs text-slate-500">
-            Powered by Universal Queue SaaS System
+        <div class="text-center mt-7 text-[11px] font-medium text-slate-500 tracking-wider uppercase">
+            Powered by Universal Queue SaaS
         </div>
     </div>
 
-<script>
+    <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
 
-        // Cek sesi lokal saat halaman dimuat
         window.addEventListener("DOMContentLoaded", () => {
             if (myRegisteredQueueNo) {
                 document.getElementById("formContainer").classList.add("hidden");
@@ -113,7 +132,6 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // Ambil data untuk menentukan nomor urut berikutnya
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -134,22 +152,18 @@
                     localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                     localStorage.setItem("my_queue_name", nama);
 
-                    // Tampilkan UI Sukses
                     document.getElementById("formContainer").classList.add("hidden");
                     document.getElementById("resultContainer").classList.remove("hidden");
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
-                    // Kirim data ke Google Sheets di latar belakang
                     fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                         method: "GET",
                         mode: "no-cors"
                     });
 
-                    // Tampilkan langsung secara instan di list live tanpa menunggu fetch server
                     appendInstantToList(myRegisteredQueueNo, nama);
 
-                    // Sinkronisasi berkala setelah 2 detik
                     setTimeout(fetchAllQueueStatus, 2000);
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
@@ -177,22 +191,19 @@
                 });
         });
 
-        // Fungsi helper untuk langsung menampilkan data ke layar secara instan
         function appendInstantToList(qNo, qNama) {
             const listContainer = document.getElementById("liveQueueList");
-            // Cek apakah elemen list kosong atau bertuliskan "Belum ada antrian"
             if (listContainer.innerHTML.includes("Belum ada antrian") || listContainer.innerHTML.trim() === "") {
                 listContainer.innerHTML = "";
             }
 
-            // Tambahkan kartu data pendaftar baru ke barisan paling atas/bawah
             listContainer.innerHTML += `
-                <div class="p-2.5 rounded-xl border border-indigo-500 bg-indigo-950/40 flex justify-between items-center text-xs">
-                    <div class="flex items-center space-x-2">
-                        <span class="font-extrabold text-white text-sm">${qNo}</span>
-                        <span class="text-slate-300 truncate max-w-[120px]">${qNama} (Anda)</span>
+                <div class="p-3 rounded-xl border border-indigo-500/40 bg-indigo-950/40 flex justify-between items-center text-xs shadow-sm">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="font-extrabold text-white text-sm bg-indigo-600/30 px-2 py-0.5 rounded-lg border border-indigo-500/30">${qNo}</span>
+                        <span class="text-slate-200 font-medium truncate max-w-[130px]">${qNama} <span class="text-indigo-400 font-bold">(Anda)</span></span>
                     </div>
-                    <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">Menunggu</span>
+                    <span class="px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">Menunggu</span>
                 </div>
             `;
             document.getElementById("displayWaiting").innerText = "0";
@@ -208,7 +219,7 @@
                     listContainer.innerHTML = ""; 
 
                     if (data.list.length === 0) {
-                        listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
+                        listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-3 font-medium">Belum ada antrian</p>`;
                         return;
                     }
 
@@ -232,30 +243,30 @@
                     }
 
                     data.list.forEach(item => {
-                        let badgeColor = "bg-slate-800 text-slate-400";
+                        let badgeColor = "bg-slate-800 text-slate-400 border-slate-700";
                         let statusText = item.status;
 
                         if (item.status === "menunggu") {
-                            badgeColor = "bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                            badgeColor = "bg-amber-500/15 text-amber-300 border-amber-500/30";
                             statusText = "Menunggu";
                         } else if (item.status === "dipanggil") {
-                            badgeColor = "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
+                            badgeColor = "bg-indigo-500/20 text-indigo-300 border-indigo-500/40 font-bold animate-pulse";
                             statusText = "Dipanggil";
                         } else if (item.status === "selesai") {
-                            badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                            badgeColor = "bg-emerald-500/15 text-emerald-300 border-emerald-500/30";
                             statusText = "Selesai";
                         }
 
                         let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
-                        let cardHighlight = isMyNumber ? "border-indigo-500 bg-indigo-950/40" : "border-slate-800 bg-slate-900/50";
+                        let cardHighlight = isMyNumber ? "border-indigo-500/60 bg-indigo-950/50 shadow-md" : "border-slate-800/80 bg-slate-900/40";
 
                         listContainer.innerHTML += `
-                            <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-extrabold text-white text-sm">${item.noAntrian}</span>
-                                    <span class="text-slate-300 truncate max-w-[120px]">${item.nama} ${isMyNumber ? '(Anda)' : ''}</span>
+                            <div class="p-3 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs transition-all">
+                                <div class="flex items-center space-x-2.5">
+                                    <span class="font-extrabold text-white text-sm bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-700">${item.noAntrian}</span>
+                                    <span class="text-slate-200 font-medium truncate max-w-[130px]">${item.nama} ${isMyNumber ? '<span class="text-indigo-400 font-bold">(Anda)</span>' : ''}</span>
                                 </div>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider ${badgeColor}">${statusText}</span>
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider border ${badgeColor} font-bold">${statusText}</span>
                             </div>
                         `;
                     });
