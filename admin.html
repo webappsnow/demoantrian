@@ -229,6 +229,13 @@
                 iconSun.classList.add("hidden");
                 iconMoon.classList.remove("hidden");
             }
+
+            // Trik "Wake-up": Mengaktifkan mesin suara browser agar tidak delay di klik pertama
+            if ('speechSynthesis' in window) {
+                let wakeUp = new SpeechSynthesisUtterance("");
+                window.speechSynthesis.speak(wakeUp);
+            }
+
             loadQueue();
         });
 
@@ -242,7 +249,7 @@
             
             let utterance = new SpeechSynthesisUtterance(msgText);
             utterance.lang = 'id-ID';
-            utterance.rate = 0.9;
+            utterance.rate = 0.95;
             utterance.pitch = 1.0;
             utterance.volume = 1.0;
 
@@ -332,14 +339,29 @@
             btn.disabled = true;
             btn.innerText = "Memproses...";
 
+            // Mencari antrian berikutnya secara lokal terlebih dahulu agar suara bisa berbunyi instan
+            let rows = document.querySelectorAll("#queueTableBody tr");
+            let nextQueueNo = null;
+            
+            rows.forEach(tr => {
+                let statusBadge = tr.querySelector("span");
+                let noTd = tr.querySelector("td");
+                if (statusBadge && statusBadge.innerText.trim() === "Menunggu" && !nextQueueNo && noTd) {
+                    nextQueueNo = noTd.innerText.trim();
+                }
+            });
+
+            // Jika antrian menunggu ditemukan di layar, bunyikan suara SEKETIKA tanpa menunggu server merespon
+            if (nextQueueNo) {
+                speakQueue(nextQueueNo);
+            }
+
+            // Sinkronisasi ke Google Sheets di latar belakang
             fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     btn.disabled = false;
                     btn.innerText = "Panggil Berikutnya";
-                    if (data.status === "success") {
-                        speakQueue(data.noAntrian);
-                    }
                     loadQueue();
                 })
                 .catch(() => {
@@ -369,12 +391,12 @@
         }
 
         function callSpecific(noAntrian) {
+            // Bunyikan suara seketika saat tombol panggil diklik
+            speakQueue(noAntrian);
+
             fetch(`${SCRIPT_URL}?action=callSpecific&no=${noAntrian}&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.status === "success") {
-                        speakQueue(noAntrian);
-                    }
                     loadQueue();
                 })
                 .catch(err => {
