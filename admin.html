@@ -84,12 +84,12 @@
                 </div>
             </div>
 
-            <!-- Daftar Antrian Menunggu -->
+            <!-- Daftar Seluruh Antrian (Termasuk yang Selesai) -->
             <div class="box-element border-2 rounded-3xl p-6 md:col-span-2 shadow-sm flex flex-col">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-black text-main text-xs sm:text-sm uppercase tracking-wider">Daftar Antrian Menunggu</h3>
+                    <h3 class="font-black text-main text-xs sm:text-sm uppercase tracking-wider">Riwayat & Daftar Antrian</h3>
                     <span class="px-3 py-1 box-element border-2 text-main text-xs font-black rounded-xl whitespace-nowrap">
-                        Total: <span id="waitingCount">0</span> orang
+                        Total Pengunjung: <span id="totalCount">0</span> orang
                     </span>
                 </div>
                 
@@ -195,26 +195,40 @@
                         document.getElementById("currentName").innerText = "Tidak ada panggilan aktif";
                     }
 
-                    document.getElementById("waitingCount").innerText = data.waitingCount || 0;
+                    // Menampilkan total keseluruhan pengunjung hari ini
+                    const allList = data.list || [];
+                    document.getElementById("totalCount").innerText = allList.length;
 
                     const tbody = document.getElementById("queueTableBody");
                     tbody.innerHTML = "";
                     
-                    const waitingList = data.list ? data.list.filter(item => item.status === "menunggu") : [];
-                    
-                    if (waitingList.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-muted font-bold">Belum ada antrian menunggu</td></tr>`;
+                    if (allList.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-muted font-bold">Belum ada antrian terdaftar</td></tr>`;
                         return;
                     }
 
-                    waitingList.forEach(item => {
+                    allList.forEach(item => {
                         let waktuBersih = formatWaktuAman(item.waktu);
+                        let badgeStyle = "box-element text-main";
+                        let statusText = item.status;
+
+                        if (item.status === "menunggu") {
+                            badgeStyle = "box-element text-main";
+                            statusText = "Menunggu";
+                        } else if (item.status === "dipanggil") {
+                            badgeStyle = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-black animate-pulse";
+                            statusText = "Dipanggil";
+                        } else if (item.status === "selesai") {
+                            badgeStyle = "box-element text-muted opacity-80";
+                            statusText = "Selesai";
+                        }
+
                         tbody.innerHTML += `
                             <tr class="transition">
                                 <td class="p-3.5 font-black text-main text-sm sm:text-base">${item.noAntrian}</td>
                                 <td class="p-3.5 text-main font-extrabold max-w-[150px] truncate">${item.nama}</td>
                                 <td class="p-3.5 text-muted font-bold font-mono">${waktuBersih}</td>
-                                <td class="p-3.5"><span class="px-2.5 py-1 box-element border-2 text-main text-[10px] sm:text-xs uppercase tracking-wider rounded-lg font-black">Menunggu</span></td>
+                                <td class="p-3.5"><span class="px-2.5 py-1 border-2 text-[10px] sm:text-xs uppercase tracking-wider rounded-lg font-black ${badgeStyle}">${statusText}</span></td>
                             </tr>
                         `;
                     });
