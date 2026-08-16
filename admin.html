@@ -348,34 +348,24 @@
                 });
         }
 
-        function callNext() {
+   function callNext() {
             const btn = document.getElementById("btnNext");
             btn.disabled = true;
             btn.innerText = "Memproses...";
 
-            // Mencari antrian berikutnya secara lokal terlebih dahulu agar suara bisa berbunyi instan
-            let rows = document.querySelectorAll("#queueTableBody tr");
-            let nextQueueNo = null;
-            
-            rows.forEach(tr => {
-                let statusBadge = tr.querySelector("span");
-                let noTd = tr.querySelector("td");
-                if (statusBadge && statusBadge.innerText.trim() === "Menunggu" && !nextQueueNo && noTd) {
-                    nextQueueNo = noTd.innerText.trim();
-                }
-            });
-
-            // Jika antrian menunggu ditemukan di layar, bunyikan suara SEKETIKA tanpa menunggu server merespon
-            if (nextQueueNo) {
-                speakQueue(nextQueueNo);
-            }
-
-            // Sinkronisasi ke Google Sheets di latar belakang
+            // Mengirim request ke Google Apps Script
             fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     btn.disabled = false;
                     btn.innerText = "Panggil Berikutnya";
+                    
+                    // Jika server sukses mengembalikan nomor antrian, langsung bunyikan suara seketika
+                    if (data.status === "success" && data.noAntrian) {
+                        speakQueue(data.noAntrian);
+                    } else if (data.status === "empty") {
+                        showModal("Informasi", "Tidak ada antrian yang menunggu.");
+                    }
                     loadQueue();
                 })
                 .catch(() => {
