@@ -36,17 +36,15 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 transition-colors duration-300">
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6 transition-colors duration-200">
     
-    <div class="max-w-md w-full glass-card rounded-[2.5rem] p-7 sm:p-9 relative overflow-hidden transition-all duration-300">
+    <div class="max-w-md w-full glass-card rounded-[2.5rem] p-7 sm:p-9 relative overflow-hidden transition-all duration-200">
         
-        <!-- Tombol Ganti Tema (Dark / Light Toggle) di Sudut Kanan Atas -->
+        <!-- Tombol Ganti Tema (Dark / Light Toggle) -->
         <button onclick="toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl border transition-all dark:bg-slate-800/80 dark:border-slate-700 dark:text-amber-400 light:bg-slate-100 light:border-slate-200 light:text-slate-700 hover:scale-105 shadow-sm" title="Ganti Tema">
-            <!-- Ikon Matahari (untuk mode terang) -->
             <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <!-- Ikon Bulan (untuk mode gelap) -->
             <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
@@ -113,12 +111,12 @@
                 </div>
             </div>
 
-            <!-- Pesan Status Minimalis & Rapi -->
+            <!-- Pesan Status Rapi & Profesional -->
             <div class="flex items-center space-x-2.5 p-3 dark:bg-indigo-500/10 light:bg-indigo-50 border dark:border-indigo-500/20 light:border-indigo-200 rounded-2xl text-indigo-500 text-xs font-medium">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>Sesi aktif tersimpan otomatis. Silakan pantau nomor Anda di atas.</span>
+                <span>Anda sudah berada di daftar antrian. Silahkan lihat status antrian.</span>
             </div>
         </div>
         
@@ -132,7 +130,7 @@
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
 
-        // Logika Tema (Dark / Light)
+        // Logika Toggle Tema Cepat & Responsif
         function toggleTheme() {
             const html = document.documentElement;
             const iconSun = document.getElementById("iconSun");
