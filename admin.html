@@ -9,13 +9,11 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* Tema Gelap: Latar hitam pekat, teks putih bersih */
         .dark body { background-color: #020617; color: #ffffff; }
         .dark .glass-card { background: #0f172a; border: 2px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         .dark .box-element { background: #1e293b; border-color: #475569; color: #ffffff; }
         .dark .btn-theme { background-color: #ffffff; color: #000000; }
         
-        /* Tema Terang: Latar putih bersih, box putih bersih, teks hitam legam */
         .light body { background-color: #f1f5f9; color: #000000; }
         .light .glass-card { background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
         .light .box-element { background: #ffffff; border-color: #cbd5e1; color: #000000; }
@@ -67,16 +65,20 @@
         <!-- Kontrol Utama -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <!-- Kartu Panggilan Aktif -->
+            <!-- Kartu Panggilan Aktif (Nomor Antrian Dibuat Responsif & Tidak Kepotong) -->
             <div class="box-element border-2 rounded-3xl p-6 md:col-span-1 text-center flex flex-col justify-between shadow-sm">
                 <div>
                     <p class="text-xs uppercase tracking-widest text-muted font-black">Sedang Dipanggil</p>
-                    <h2 id="currentCall" class="text-6xl font-black text-main tracking-wider my-4">-</h2>
-                    <p id="currentName" class="text-xs sm:text-sm font-extrabold text-main px-1 leading-snug">-</p>
+                    <!-- Menggunakan text-4xl sm:text-5xl dan truncate agar aman dari terpotong ke bawah -->
+                    <h2 id="currentCall" class="text-4xl sm:text-5xl font-black text-main tracking-wider my-4 truncate px-1">-</h2>
+                    <p id="currentName" class="text-xs sm:text-sm font-extrabold text-main px-1 leading-snug truncate">-</p>
                 </div>
                 <div class="mt-8 space-y-3">
-                    <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-4 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
-                        Panggil Berikutnya (Next)
+                    <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-3.5 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
+                        Panggil Berikutnya
+                    </button>
+                    <button id="btnSkip" onclick="skipCurrent()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm">
+                        Lewati (Skip)
                     </button>
                     <button onclick="resetData()" class="w-full box-element border-2 text-main font-black py-3 rounded-xl text-xs transition cursor-pointer hover:opacity-80">
                         Reset Antrian Hari Ini
@@ -84,7 +86,7 @@
                 </div>
             </div>
 
-            <!-- Daftar Seluruh Antrian (Termasuk yang Selesai) -->
+            <!-- Daftar Seluruh Antrian -->
             <div class="box-element border-2 rounded-3xl p-6 md:col-span-2 shadow-sm flex flex-col">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-black text-main text-xs sm:text-sm uppercase tracking-wider">Riwayat & Daftar Antrian</h3>
@@ -195,7 +197,6 @@
                         document.getElementById("currentName").innerText = "Tidak ada panggilan aktif";
                     }
 
-                    // Menampilkan total keseluruhan pengunjung hari ini
                     const allList = data.list || [];
                     document.getElementById("totalCount").innerText = allList.length;
 
@@ -211,6 +212,7 @@
                         let waktuBersih = formatWaktuAman(item.waktu);
                         let badgeStyle = "box-element text-main";
                         let statusText = item.status;
+                        let actionButton = "";
 
                         if (item.status === "menunggu") {
                             badgeStyle = "box-element text-main";
@@ -218,6 +220,10 @@
                         } else if (item.status === "dipanggil") {
                             badgeStyle = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-black animate-pulse";
                             statusText = "Dipanggil";
+                        } else if (item.status === "dilewati") {
+                            badgeStyle = "bg-amber-500/20 text-amber-500 border-amber-500/30";
+                            statusText = "Dilewati";
+                            actionButton = `<button onclick="callSpecific('${item.noAntrian}')" class="ml-2 px-2 py-0.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded font-bold text-[10px] cursor-pointer">Panggil</button>`;
                         } else if (item.status === "selesai") {
                             badgeStyle = "box-element text-muted opacity-80";
                             statusText = "Selesai";
@@ -228,7 +234,12 @@
                                 <td class="p-3.5 font-black text-main text-sm sm:text-base">${item.noAntrian}</td>
                                 <td class="p-3.5 text-main font-extrabold max-w-[150px] truncate">${item.nama}</td>
                                 <td class="p-3.5 text-muted font-bold font-mono">${waktuBersih}</td>
-                                <td class="p-3.5"><span class="px-2.5 py-1 border-2 text-[10px] sm:text-xs uppercase tracking-wider rounded-lg font-black ${badgeStyle}">${statusText}</span></td>
+                                <td class="p-3.5">
+                                    <div class="flex items-center space-x-1">
+                                        <span class="px-2.5 py-1 border-2 text-[10px] sm:text-xs uppercase tracking-wider rounded-lg font-black ${badgeStyle}">${statusText}</span>
+                                        ${actionButton}
+                                    </div>
+                                </td>
                             </tr>
                         `;
                     });
@@ -241,19 +252,49 @@
         function callNext() {
             const btn = document.getElementById("btnNext");
             btn.disabled = true;
-            btn.innerText = "Memanggil...";
+            btn.innerText = "Memproses...";
 
             fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     btn.disabled = false;
-                    btn.innerText = "Panggil Berikutnya (Next)";
+                    btn.innerText = "Panggil Berikutnya";
                     loadQueue();
                 })
                 .catch(() => {
                     btn.disabled = false;
-                    btn.innerText = "Panggil Berikutnya (Next)";
+                    btn.innerText = "Panggil Berikutnya";
                     loadQueue();
+                });
+        }
+
+        function skipCurrent() {
+            const btn = document.getElementById("btnSkip");
+            btn.disabled = true;
+            btn.innerText = "Melewati...";
+
+            fetch(`${SCRIPT_URL}?action=skip&loket=Loket 1`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerText = "Lewati (Skip)";
+                    loadQueue();
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = "Lewati (Skip)";
+                    loadQueue();
+                });
+        }
+
+        function callSpecific(noAntrian) {
+            fetch(`${SCRIPT_URL}?action=callSpecific&no=${noAntrian}&loket=Loket 1`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    loadQueue();
+                })
+                .catch(err => {
+                    console.error("Gagal memanggil ulang:", err);
                 });
         }
 
