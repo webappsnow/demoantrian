@@ -13,11 +13,13 @@
         .dark body { background-color: #020617; color: #ffffff; }
         .dark .glass-card { background: #0f172a; border: 2px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         .dark .box-element { background: #1e293b; border-color: #475569; color: #ffffff; }
+        .dark .btn-theme { background-color: #ffffff; color: #000000; }
         
         /* Tema Terang: Latar putih bersih, box putih bersih, teks hitam legam */
         .light body { background-color: #f1f5f9; color: #000000; }
         .light .glass-card { background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
         .light .box-element { background: #ffffff; border-color: #cbd5e1; color: #000000; }
+        .light .btn-theme { background-color: #000000; color: #ffffff; }
 
         .text-main { color: #000000; }
         .dark .text-main { color: #ffffff; }
@@ -86,7 +88,7 @@
                     </label>
                     <input type="tel" id="telepon" class="w-full px-4 py-3.5 rounded-xl border-2 box-element text-sm font-extrabold outline-none transition" placeholder="">
                 </div>
-                <button type="submit" id="btnSubmit" class="w-full mt-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-black py-4 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
+                <button type="submit" id="btnSubmit" class="w-full mt-2 btn-theme font-black py-4 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
                     Ambil Nomor Antrian
                 </button>
             </form>
