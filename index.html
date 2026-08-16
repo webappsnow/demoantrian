@@ -158,7 +158,6 @@
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
         let modalCallback = null;
 
-        // Fungsi Custom Modern Modal
         function showModal(title, message, callback = null) {
             document.getElementById("modalTitle").innerText = title;
             document.getElementById("modalMessage").innerText = message;
@@ -327,7 +326,7 @@
                 <div class="p-3 rounded-xl border-2 box-element flex justify-between items-center text-xs sm:text-sm shadow-sm">
                     <div class="flex items-center space-x-3 overflow-hidden">
                         <span class="font-black text-main text-sm sm:text-base box-element px-2.5 py-1 rounded-lg border-2 shrink-0">${qNo}</span>
-                        <span class="text-main font-extrabold truncate max-w-[110px] sm:max-w-[140px]">${qNama} <span class="font-black underline">(Anda)</span></span>
+                        <span class="text-main font-extrabold truncate max-w-[140px] sm:max-w-[180px]">${qNama}</span>
                     </div>
                     <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider box-element text-main font-black border-2 shrink-0">Menunggu</span>
                 </div>
@@ -345,11 +344,8 @@
                     const listContainer = document.getElementById("liveQueueList");
                     listContainer.innerHTML = ""; 
 
-                    if (data.list.length === 0) {
-                        listContainer.innerHTML = `<p class="text-xs sm:text-sm text-muted text-center py-3 font-bold">Belum ada antrian</p>`;
-                        return;
-                    }
-
+                    // Hanya ambil yang statusnya "menunggu" atau "dipanggil" (yang "selesai" disembunyikan dari halaman pelanggan)
+                    let activeList = data.list.filter(item => item.status === "menunggu" || item.status === "dipanggil");
                     let waitingList = data.list.filter(item => item.status === "menunggu");
                     let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
                     let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
@@ -381,7 +377,12 @@
                         }
                     }
 
-                    data.list.forEach(item => {
+                    if (activeList.length === 0) {
+                        listContainer.innerHTML = `<p class="text-xs sm:text-sm text-muted text-center py-3 font-bold">Belum ada antrian</p>`;
+                        return;
+                    }
+
+                    activeList.forEach(item => {
                         let badgeClass = "box-element text-main";
                         let statusText = item.status;
 
@@ -391,9 +392,6 @@
                         } else if (item.status === "dipanggil") {
                             badgeClass = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-black animate-pulse";
                             statusText = "Dipanggil";
-                        } else if (item.status === "selesai") {
-                            badgeClass = "box-element text-muted opacity-80";
-                            statusText = "Selesai";
                         }
 
                         let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
@@ -403,7 +401,7 @@
                             <div class="p-3 rounded-xl border-2 ${cardHighlight} flex justify-between items-center text-xs sm:text-sm transition-all shadow-sm">
                                 <div class="flex items-center space-x-3 overflow-hidden">
                                     <span class="font-black text-main text-sm sm:text-base box-element px-2.5 py-1 rounded-lg border-2 shrink-0">${item.noAntrian}</span>
-                                    <span class="text-main font-extrabold truncate max-w-[110px] sm:max-w-[140px]">${item.nama} ${isMyNumber ? '<span class="font-black underline">(Anda)</span>' : ''}</span>
+                                    <span class="text-main font-extrabold truncate max-w-[140px] sm:max-w-[180px]">${item.nama}</span>
                                 </div>
                                 <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider border-2 ${badgeClass} font-black shrink-0">${statusText}</span>
                             </div>
