@@ -30,6 +30,24 @@
 </head>
 <body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
     
+    <!-- Modern Custom Modal / Popup -->
+    <div id="customModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-sm glass-card rounded-3xl p-6 text-center border-2 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
+            <div id="modalIconContainer" class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <div>
+                <h3 id="modalTitle" class="text-lg font-black text-main">Informasi</h3>
+                <p id="modalMessage" class="text-xs sm:text-sm text-muted font-bold mt-2">Pesan informasi sistem.</p>
+            </div>
+            <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
+                OK, Mengerti
+            </button>
+        </div>
+    </div>
+
     <div class="w-full max-w-sm sm:max-w-md glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all">
         
         <!-- Logo di Pojok Kiri Atas -->
@@ -114,7 +132,6 @@
             <div class="box-element border-2 rounded-2xl p-4 shadow-sm">
                 <div class="flex items-center justify-between mb-3 px-1">
                     <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Live Status Antrian</p>
-                    <!-- Indikator Kedip -->
                     <span class="relative flex h-2.5 w-2.5">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -137,9 +154,25 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
-        // ... sisa skrip sama seperti sebelumnya ...
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
+        let modalCallback = null;
+
+        // Fungsi Custom Modern Modal
+        function showModal(title, message, callback = null) {
+            document.getElementById("modalTitle").innerText = title;
+            document.getElementById("modalMessage").innerText = message;
+            document.getElementById("customModal").classList.remove("hidden");
+            modalCallback = callback;
+        }
+
+        function closeModal() {
+            document.getElementById("customModal").classList.add("hidden");
+            if (modalCallback) {
+                modalCallback();
+                modalCallback = null;
+            }
+        }
 
         function updateRealTimeClock() {
             const now = new Date();
@@ -212,8 +245,9 @@
             e.preventDefault();
             
             if (localStorage.getItem("my_queue_number")) {
-                alert("Anda sudah terdaftar di dalam antrian!");
-                location.reload();
+                showModal("Perhatian", "Anda sudah terdaftar di dalam antrian!", () => {
+                    location.reload();
+                });
                 return;
             }
 
@@ -328,8 +362,9 @@
                         if (foundInList.status === "selesai") {
                             localStorage.removeItem("my_queue_number");
                             localStorage.removeItem("my_queue_name");
-                            alert("Layanan telah selesai. Terima kasih!");
-                            location.reload();
+                            showModal("Selesai", "Layanan telah selesai. Terima kasih!", () => {
+                                location.reload();
+                            });
                             return;
                         } else if (foundInList.status === "dipanggil") {
                             statusInfoTextEl.innerText = "Status Anda:";
