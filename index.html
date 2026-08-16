@@ -169,41 +169,60 @@
                 });
         });
 
-        function fetchAllQueueStatus() {
+       function fetchAllQueueStatus() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     if (!data || !data.list) return;
 
-                    if (myRegisteredQueueNo) {
-                        let waitingList = data.list.filter(item => item.status === "menunggu");
-                        let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
-                        let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
-
-                        if (foundInList) {
-                            if (foundInList.status === "selesai") {
-                                document.getElementById("statusInfoText").innerText = "Status Anda:";
-                                document.getElementById("displayWaiting").innerText = "SELESAI";
-                            } else if (foundInList.status === "dipanggil") {
-                                document.getElementById("statusInfoText").innerText = "Status Anda:";
-                                document.getElementById("displayWaiting").innerText = "GILIRAN!";
-                            } else {
-                                if (myIndex !== -1) {
-                                    document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
-                                    document.getElementById("displayWaiting").innerText = myIndex;
-                                }
-                            }
-                        }
-                    }
-
                     const listContainer = document.getElementById("liveQueueList");
-                    listContainer.innerHTML = "";
+                    listContainer.innerHTML = ""; // Bersihkan tulisan memuat
 
                     if (data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
                         return;
                     }
 
+                    // Jika nomor lokal belum valid atau belum cocok, sinkronkan otomatis dengan nama di localStorage
+                    let savedName = localStorage.getItem("my_queue_name");
+                    if (savedName && (!myRegisteredQueueNo || !data.list.some(item => item.noAntrian === myRegisteredQueueNo))) {
+                        let matched = data.list.slice().reverse().find(item => item.nama && item.nama.trim().toLowerCase() === savedName.trim().toLowerCase());
+                        if (matched) {
+                            myRegisteredQueueNo = matched.noAntrian;
+                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                        } else if (data.list.length > 0) {
+                            // Ambil baris terakhir sebagai fallback jika nama tidak ketemu persis
+                            myRegisteredQueueNo = data.list[data.list.length - 1].noAntrian;
+                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                        }
+                    }
+
+                    // Hitung estimasi sisa antrian di depan
+                    let waitingList = data.list.filter(item => item.status === "menunggu");
+                    let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
+                    let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
+
+                    if (foundInList) {
+                        if (foundInList.status === "selesai") {
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "SELESAI";
+                        } else if (foundInList.status === "dipanggil") {
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "GILIRAN!";
+                        } else {
+                            if (myIndex !== -1) {
+                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
+                                document.getElementById("displayWaiting").innerText = myIndex;
+                            } else {
+                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
+                                document.getElementById("displayWaiting").innerText = "0";
+                            }
+                        }
+                    }
+
+                    // Render semua daftar antrian ke layar
                     data.list.forEach(item => {
                         let badgeColor = "bg-slate-800 text-slate-400";
                         let statusText = item.status;
