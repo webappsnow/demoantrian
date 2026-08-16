@@ -126,10 +126,12 @@
                     <button id="btnNext" onclick="callNext()" class="w-full btn-theme font-black py-3 sm:py-3.5 rounded-xl text-xs sm:text-sm hover:opacity-95 transition shadow-md cursor-pointer flex items-center justify-center space-x-2">
                         <span>Panggil Berikutnya</span>
                     </button>
-                    <button id="btnRespeak" onclick="reSpeak()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
+                    <!-- Tombol Panggil Ulang (Default Disabled) -->
+                    <button id="btnRespeak" onclick="reSpeak()" disabled class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-xl text-xs transition shadow-sm flex items-center justify-center space-x-2 opacity-40 cursor-not-allowed">
                         <span>Panggil Ulang (Re-Call)</span>
                     </button>
-                    <button id="btnSkip" onclick="skipCurrent()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
+                    <!-- Tombol Lewati / Skip (Default Disabled) -->
+                    <button id="btnSkip" onclick="skipCurrent()" disabled class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl text-xs transition shadow-sm flex items-center justify-center space-x-2 opacity-40 cursor-not-allowed">
                         <span>Lewati (Skip)</span>
                     </button>
                     <button id="btnExcel" onclick="downloadExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl text-xs transition cursor-pointer shadow-sm flex items-center justify-center space-x-2">
@@ -230,7 +232,6 @@
             if (event.key === "Enter") unlockPanel();
         });
 
-        // 1. Tombol Toggle Status Buka/Tutup
         function toggleQueueStatus() {
             let btn = document.getElementById("btnToggleStatus");
             btn.disabled = true;
@@ -342,7 +343,6 @@
             }
         }
 
-        // 2. Tombol Panggil Ulang (Re-Call) dengan Spinner
         function reSpeak() {
             let currentNo = document.getElementById("currentCall").innerText;
             if (currentNo === "-") return;
@@ -379,12 +379,29 @@
                         updateStatusButtonUI(data.queueStatus);
                     }
 
+                    const btnRespeak = document.getElementById("btnRespeak");
+                    const btnSkip = document.getElementById("btnSkip");
+
                     if (data.current) {
                         document.getElementById("currentCall").innerText = data.current.noAntrian;
                         document.getElementById("currentName").innerText = data.current.nama;
+
+                        // Aktifkan tombol Panggil Ulang & Skip karena ada yang sedang dipanggil
+                        btnRespeak.disabled = false;
+                        btnRespeak.classList.remove("opacity-40", "cursor-not-allowed");
+                        
+                        btnSkip.disabled = false;
+                        btnSkip.classList.remove("opacity-40", "cursor-not-allowed");
                     } else {
                         document.getElementById("currentCall").innerText = "-";
                         document.getElementById("currentName").innerText = "Tidak ada panggilan aktif";
+
+                        // Matikan tombol Panggil Ulang & Skip jika kosong
+                        btnRespeak.disabled = true;
+                        btnRespeak.classList.add("opacity-40", "cursor-not-allowed");
+
+                        btnSkip.disabled = true;
+                        btnSkip.classList.add("opacity-40", "cursor-not-allowed");
                     }
 
                     const allList = data.list || [];
@@ -437,7 +454,6 @@
                 .catch(err => console.error("Gagal memuat antrian:", err));
         }
 
-        // 3. Tombol Panggil Berikutnya dengan Spinner
         function callNext() {
             const btn = document.getElementById("btnNext");
             btn.disabled = true;
@@ -462,7 +478,6 @@
                 });
         }
 
-        // 4. Tombol Lewati (Skip) dengan Spinner
         function skipCurrent() {
             const btn = document.getElementById("btnSkip");
             btn.disabled = true;
@@ -488,7 +503,6 @@
                 .then(res => res.json()).then(() => loadQueue());
         }
 
-        // 5. Tombol Unduh Excel dengan Spinner
         function downloadExcel() {
             const btn = document.getElementById("btnExcel");
             btn.disabled = true;
@@ -524,7 +538,6 @@
                 });
         }
 
-        // 6. Tombol Reset Antrian dengan Spinner
         function confirmResetData() {
             showModal("Konfirmasi Reset", "Yakin ingin mereset seluruh antrian hari ini?", () => {
                 const btnReset = document.getElementById("btnReset");
