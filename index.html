@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    <script>
+<script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
@@ -97,7 +97,7 @@
             }
         });
 
-    document.getElementById("queueForm").addEventListener("submit", function(e) {
+        document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
             
             if (localStorage.getItem("my_queue_number")) {
@@ -113,6 +113,7 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
+            // Ambil data untuk menentukan nomor urut berikutnya
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -133,22 +134,23 @@
                     localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                     localStorage.setItem("my_queue_name", nama);
 
+                    // Tampilkan UI Sukses
                     document.getElementById("formContainer").classList.add("hidden");
                     document.getElementById("resultContainer").classList.remove("hidden");
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
-                    // 1. Kirim data pendaftaran ke Google Sheets di latar belakang
+                    // Kirim data ke Google Sheets di latar belakang
                     fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                         method: "GET",
                         mode: "no-cors"
                     });
 
-                    // 2. Beri jeda 1,5 detik agar Google Sheets selesai menulis baris baru, baru tarik datanya
-                    setTimeout(() => {
-                        fetchAllQueueStatus();
-                    }, 1500);
+                    // Tampilkan langsung secara instan di list live tanpa menunggu fetch server
+                    appendInstantToList(myRegisteredQueueNo, nama);
 
+                    // Sinkronisasi berkala setelah 2 detik
+                    setTimeout(fetchAllQueueStatus, 2000);
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
                 })
@@ -167,39 +169,49 @@
                         mode: "no-cors"
                     });
 
-                    setTimeout(() => {
-                        fetchAllQueueStatus();
-                    }, 1500);
+                    appendInstantToList(myRegisteredQueueNo, nama);
 
+                    setTimeout(fetchAllQueueStatus, 2000);
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
                 });
         });
 
+        // Fungsi helper untuk langsung menampilkan data ke layar secara instan
+        function appendInstantToList(qNo, qNama) {
+            const listContainer = document.getElementById("liveQueueList");
+            // Cek apakah elemen list kosong atau bertuliskan "Belum ada antrian"
+            if (listContainer.innerHTML.includes("Belum ada antrian") || listContainer.innerHTML.trim() === "") {
+                listContainer.innerHTML = "";
+            }
+
+            // Tambahkan kartu data pendaftar baru ke barisan paling atas/bawah
+            listContainer.innerHTML += `
+                <div class="p-2.5 rounded-xl border border-indigo-500 bg-indigo-950/40 flex justify-between items-center text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-extrabold text-white text-sm">${qNo}</span>
+                        <span class="text-slate-300 truncate max-w-[120px]">${qNama} (Anda)</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-md text-[10px] uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30">Menunggu</span>
+                </div>
+            `;
+            document.getElementById("displayWaiting").innerText = "0";
+        }
+
         function fetchAllQueueStatus() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
-                    const listContainer = document.getElementById("liveQueueList");
-                    listContainer.innerHTML = ""; // Bersihkan kontainer list
+                    if (!data || !data.list) return;
 
-                    if (!data || !data.list || data.list.length === 0) {
+                    const listContainer = document.getElementById("liveQueueList");
+                    listContainer.innerHTML = ""; 
+
+                    if (data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
                         return;
                     }
 
-                    // Sinkronisasi ulang nama jika sesi lokal berbeda
-                    let savedName = localStorage.getItem("my_queue_name");
-                    if (savedName && (!myRegisteredQueueNo || !data.list.some(item => item.noAntrian === myRegisteredQueueNo))) {
-                        let matched = data.list.slice().reverse().find(item => item.nama && item.nama.trim().toLowerCase() === savedName.trim().toLowerCase());
-                        if (matched) {
-                            myRegisteredQueueNo = matched.noAntrian;
-                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
-                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                        }
-                    }
-
-                    // Hitung sisa antrian di depan
                     let waitingList = data.list.filter(item => item.status === "menunggu");
                     let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
                     let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
@@ -215,14 +227,10 @@
                             if (myIndex !== -1) {
                                 document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
                                 document.getElementById("displayWaiting").innerText = myIndex;
-                            } else {
-                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
-                                document.getElementById("displayWaiting").innerText = "0";
                             }
                         }
                     }
 
-                    // Render daftar antrian ke layar
                     data.list.forEach(item => {
                         let badgeColor = "bg-slate-800 text-slate-400";
                         let statusText = item.status;
