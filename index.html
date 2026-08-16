@@ -51,13 +51,13 @@
             <h1 class="text-2xl font-black text-main mt-1">Antrian Digital</h1>
         </div>
 
-        <!-- Jam & Tanggal (Lengkap) -->
-        <div class="mb-5 p-4 rounded-2xl box-element border-2 flex justify-between items-center text-sm font-black shadow-inner">
+        <!-- Jam & Tanggal (Disusun Vertikal / 2 Baris agar Tidak Terpotong) -->
+        <div class="mb-5 p-4 rounded-2xl box-element border-2 flex flex-col sm:flex-row justify-between items-center text-xs sm:text-sm font-black shadow-inner gap-2 sm:gap-0">
             <div class="flex items-center space-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span id="realDate">--/--/----</span>
+                <span id="realDate" class="text-center sm:text-left">--/--/----</span>
             </div>
             <div class="flex items-center space-x-1.5 font-mono">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
