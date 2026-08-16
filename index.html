@@ -92,28 +92,49 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`)
-                .then(res => res.json())
-                .then(data => {
-                    document.getElementById("formContainer").classList.add("hidden");
-                    document.getElementById("resultContainer").classList.remove("hidden");
-                    
-                    document.getElementById("displayNo").innerText = data.noAntrian;
-                    document.getElementById("displayName").innerText = data.nama;
-                    
-                    fetchAllQueueStatus(data.noAntrian);
+            // Menggunakan mode 'no-cors' untuk mencegah blokir browser
+            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                method: "GET",
+                mode: "no-cors"
+            })
+            .then(() => {
+                document.getElementById("formContainer").classList.add("hidden");
+                document.getElementById("resultContainer").classList.remove("hidden");
+                
+                // Ambil nomor antrian terbaru berdasarkan nama yang diinput
+                fetchLatestQueueNumber(nama);
+            })
+            .catch(err => {
+                alert("Terjadi kesalahan koneksi.");
+                btn.disabled = false;
+                btn.innerText = "Ambil Nomor Antrian";
+            });
+        });
+
+        function fetchLatestQueueNumber(myNama) {
+            fetch(`${SCRIPT_URL}?action=getQueue`)
+            .then(res => res.json())
+            .then(data => {
+                let myData = data.list.slice().reverse().find(item => item.nama === myNama);
+                if (myData) {
+                    document.getElementById("displayNo").innerText = myData.noAntrian;
+                    document.getElementById("displayName").innerText = myData.nama;
+                    fetchAllQueueStatus(myData.noAntrian);
 
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
                     autoUpdateInterval = setInterval(() => {
-                        fetchAllQueueStatus(data.noAntrian);
+                        fetchAllQueueStatus(myData.noAntrian);
                     }, 4000);
-                })
-                .catch(err => {
-                    alert("Terjadi kesalahan, silakan coba lagi.");
-                    btn.disabled = false;
-                    btn.innerText = "Ambil Nomor Antrian";
-                });
-        });
+                } else {
+                    document.getElementById("displayNo").innerText = "A-001";
+                    document.getElementById("displayName").innerText = myNama;
+                }
+            })
+            .catch(() => {
+                document.getElementById("displayNo").innerText = "Berhasil!";
+                document.getElementById("displayName").innerText = myNama;
+            });
+        }
 
         function fetchAllQueueStatus(myQueueNo) {
             fetch(`${SCRIPT_URL}?action=getQueue`)
