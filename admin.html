@@ -3,61 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Universal Queue</title>
+    <title>Panel Petugas / Kasir - Universal Queue</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-100 font-sans min-h-screen p-6">
-    <div class="max-w-4xl mx-auto space-y-6">
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-4 md:p-8 flex items-center justify-center">
+    <div class="max-w-4xl w-full space-y-6">
+        
         <!-- Header -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 flex justify-between items-center">
+        <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
             <div>
-                <h1 class="text-xl font-bold text-slate-800">Panel Petugas / Kasir</h1>
-                <p class="text-sm text-slate-500">Kelola pemanggilan antrean toko</p>
+                <h1 class="text-xl font-extrabold text-white tracking-tight">Panel Petugas / Kasir</h1>
+                <p class="text-sm text-slate-400 mt-0.5">Kelola pemanggilan antrean secara real-time</p>
             </div>
-            <div>
-                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">Online</span>
+            <div class="flex items-center space-x-2">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                </span>
+                <span class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-semibold rounded-full">Sistem Aktif</span>
             </div>
         </div>
 
         <!-- Kontrol Utama -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-2xl shadow-sm p-6 md:col-span-1 text-center flex flex-col justify-between">
+            
+            <!-- Kartu Panggilan Aktif -->
+            <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 md:col-span-1 text-center flex flex-col justify-between shadow-xl">
                 <div>
-                    <p class="text-sm text-slate-500 font-medium">Sedang Dipanggil</p>
-                    <h2 id="currentCall" class="text-6xl font-black text-indigo-600 my-4">-</h2>
-                    <p id="currentName" class="text-lg font-bold text-slate-800">-</p>
+                    <p class="text-xs uppercase tracking-widest text-indigo-400 font-bold">Sedang Dipanggil</p>
+                    <h2 id="currentCall" class="text-6xl font-black text-white tracking-wider my-4">-</h2>
+                    <p id="currentName" class="text-base font-semibold text-slate-300">-</p>
                 </div>
-                <div class="mt-6 space-y-3">
-                    <button onclick="callNext()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-indigo-100">
+                <div class="mt-8 space-y-3">
+                    <button id="btnNext" onclick="callNext()" class="w-full bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-indigo-500/20 active:scale-[0.98]">
                         Panggil Berikutnya (Next)
                     </button>
-                    <button onclick="resetData()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-2 rounded-xl text-sm transition">
+                    <button onclick="resetData()" class="w-full bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold py-3 rounded-2xl text-xs transition border border-slate-600/40">
                         Reset Antrean Hari Ini
                     </button>
                 </div>
             </div>
 
             <!-- Daftar Antrean Menunggu -->
-            <div class="bg-white rounded-2xl shadow-sm p-6 md:col-span-2">
-                <h3 class="font-bold text-slate-800 mb-4">Daftar Antrean Menunggu (<span id="waitingCount">0</span>)</h3>
-                <div class="overflow-x-auto max-h-80 overflow-y-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-600 sticky top-0">
+            <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 md:col-span-2 shadow-xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-white text-sm uppercase tracking-wider">Daftar Antrean Menunggu</h3>
+                    <span class="px-2.5 py-1 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-xs font-bold rounded-xl">
+                        Total: <span id="waitingCount">0</span> orang
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto max-h-72 overflow-y-auto pr-1">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-900/60 text-slate-400 sticky top-0 uppercase tracking-wider">
                             <tr>
-                                <th class="p-3">No</th>
-                                <th class="p-3">Nama</th>
-                                <th class="p-3">Waktu Daftar</th>
-                                <th class="p-3">Status</th>
+                                <th class="p-3.5 rounded-l-xl">No</th>
+                                <th class="p-3.5">Nama</th>
+                                <th class="p-3.5">Waktu Daftar</th>
+                                <th class="p-3.5 rounded-r-xl">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="queueTableBody" class="divide-y divide-slate-100">
+                        <tbody id="queueTableBody" class="divide-y divide-slate-700/40">
                             <tr>
-                                <td colspan="4" class="text-center p-4 text-slate-400">Memuat data...</td>
+                                <td colspan="4" class="text-center p-6 text-slate-500">Memuat data...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
+        </div>
+        
+        <div class="text-center text-xs text-slate-500">
+            Admin Dashboard - Universal Queue SaaS System
         </div>
     </div>
 
@@ -65,64 +87,82 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
 
         function loadQueue() {
-            fetch(`${SCRIPT_URL}?action=getQueue`)
+            fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
-                    // Update current call
+                    if (!data) return;
+
+                    // Update antrean yang sedang dipanggil
                     if (data.current) {
-                        document.getElementById("currentCall").innerText = data.current.noAntrean;
+                        document.getElementById("currentCall").innerText = data.current.noAntrian;
                         document.getElementById("currentName").innerText = data.current.nama;
                     } else {
                         document.getElementById("currentCall").innerText = "-";
                         document.getElementById("currentName").innerText = "Tidak ada panggilan aktif";
                     }
 
-                    // Update waiting count
-                    document.getElementById("waitingCount").innerText = data.waitingCount;
+                    // Update jumlah menunggu
+                    document.getElementById("waitingCount").innerText = data.waitingCount || 0;
 
-                    // Update table list
+                    // Update tabel daftar menunggu
                     const tbody = document.getElementById("queueTableBody");
                     tbody.innerHTML = "";
                     
-                    const waitingList = data.list.filter(item => item.status === "menunggu");
+                    const waitingList = data.list ? data.list.filter(item => item.status === "menunggu") : [];
+                    
                     if (waitingList.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-slate-400">Belum ada antrean menunggu</td></tr>`;
+                        tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-slate-500">Belum ada antrean menunggu</td></tr>`;
                         return;
                     }
 
                     waitingList.forEach(item => {
                         tbody.innerHTML += `
-                            <tr class="hover:bg-slate-50">
-                                <td class="p-3 font-bold text-indigo-600">${item.noAntrean}</td>
-                                <td class="p-3 text-slate-800">${item.nama}</td>
-                                <td class="p-3 text-slate-500">${item.waktu}</td>
-                                <td class="p-3"><span class="px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded-md">Menunggu</span></td>
+                            <tr class="hover:bg-slate-700/30 transition">
+                                <td class="p-3.5 font-extrabold text-indigo-400 text-sm">${item.noAntrian}</td>
+                                <td class="p-3.5 text-slate-200 font-medium">${item.nama}</td>
+                                <td class="p-3.5 text-slate-400">${item.waktu}</td>
+                                <td class="p-3.5"><span class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] uppercase tracking-wider rounded-md font-semibold">Menunggu</span></td>
                             </tr>
                         `;
                     });
+                })
+                .catch(err => {
+                    console.error("Gagal memuat antrean:", err);
                 });
         }
 
         function callNext() {
-            fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`)
+            const btn = document.getElementById("btnNext");
+            btn.disabled = true;
+            btn.innerText = "Memanggil...";
+
+            fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
+                    btn.disabled = false;
+                    btn.innerText = "Panggil Berikutnya (Next)";
+                    loadQueue();
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = "Panggil Berikutnya (Next)";
                     loadQueue();
                 });
         }
 
         function resetData() {
-            if (confirm("Yakin ingin mereset seluruh antrean hari ini?")) {
-                fetch(`${SCRIPT_URL}?action=reset`)
+            if (confirm("Yakin ingin mereset seluruh antrean hari ini? Data di Google Sheets akan dikosongkan.")) {
+                fetch(`${SCRIPT_URL}?action=reset`, { method: "GET", redirect: "follow" })
                     .then(res => res.json())
                     .then(data => {
+                        alert("Antrean berhasil direset!");
                         loadQueue();
                     });
             }
         }
 
-        // Auto Refresh tiap 3 detik
-        setInterval(loadQueue, 3000);
+        // Auto Refresh tiap 4 detik
+        setInterval(loadQueue, 4000);
         loadQueue();
     </script>
 </body>
