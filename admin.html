@@ -142,7 +142,6 @@
             }
         }
 
-        // Muat tema awal
         (function() {
             const savedTheme = localStorage.getItem("theme") || "dark";
             const html = document.documentElement;
@@ -169,6 +168,20 @@
             }
             loadQueue();
         });
+
+        // Fungsi pembersih format waktu agar aman dari bug 1899
+        function formatWaktuAman(rawWaktu) {
+            if (!rawWaktu) return "-";
+            let strWaktu = rawWaktu.toString();
+            // Jika mengandung format tanggal ISO / 1899, ambil bagian jamnya saja
+            if (strWaktu.includes("1899") || strWaktu.includes("T")) {
+                let d = new Date(rawWaktu);
+                if (!isNaN(d.getTime())) {
+                    return d.toLocaleTimeString('id-ID', { hour12: false });
+                }
+            }
+            return strWaktu;
+        }
 
         function loadQueue() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
@@ -197,11 +210,12 @@
                     }
 
                     waitingList.forEach(item => {
+                        let waktuBersih = formatWaktuAman(item.waktu);
                         tbody.innerHTML += `
                             <tr class="transition">
                                 <td class="p-3.5 font-black text-main text-sm sm:text-base">${item.noAntrian}</td>
                                 <td class="p-3.5 text-main font-extrabold">${item.nama}</td>
-                                <td class="p-3.5 text-muted font-bold">${item.waktu}</td>
+                                <td class="p-3.5 text-muted font-bold">${waktuBersih}</td>
                                 <td class="p-3.5"><span class="px-2.5 py-1 box-element border-2 text-main text-[10px] sm:text-xs uppercase tracking-wider rounded-lg font-black">Menunggu</span></td>
                             </tr>
                         `;
