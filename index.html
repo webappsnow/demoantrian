@@ -9,53 +9,54 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* Palet Warna Mewah - Minimalis & Clean */
-        .dark body { background-color: #020617; color: #f1f5f9; }
-        .dark .glass-card { background: rgba(15, 23, 42, 0.92); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); }
+        /* Tema Gelap: Latar sangat gelap, teks putih bersih & kontras tajam */
+        .dark body { background-color: #020617; color: #ffffff; }
+        .dark .glass-card { background: #0f172a; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         
-        .light body { background-color: #f8fafc; color: #1e293b; }
-        .light .glass-card { background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08); }
+        /* Tema Terang: Latar putih bersih, teks hitam legam & sangat tajam */
+        .light body { background-color: #f8fafc; color: #0f172a; }
+        .light .glass-card { background: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.12); }
 
-        .text-main { color: #1e293b; }
-        .dark .text-main { color: #f8fafc; }
+        .text-main { color: #0f172a; }
+        .dark .text-main { color: #ffffff; }
         
-        .text-muted { color: #64748b; }
-        .dark .text-muted { color: #94a3b8; }
+        .text-muted { color: #475569; }
+        .dark .text-muted { color: #cbd5e1; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex items-center justify-center transition-colors duration-300">
     
     <div class="w-full max-w-sm glass-card rounded-[2.5rem] p-7 relative overflow-hidden transition-all">
         
-        <!-- Toggle Tema Minimalis -->
-        <button onclick="toggleTheme()" class="absolute top-6 right-6 p-2 rounded-xl border dark:border-slate-800 light:border-slate-200 dark:bg-slate-900 light:bg-slate-50 transition-all hover:scale-105 z-20 cursor-pointer" title="Ganti Tema">
-            <span id="themeLabel" class="text-[9px] font-bold tracking-widest uppercase opacity-70">Theme</span>
+        <!-- Toggle Tema -->
+        <button onclick="toggleTheme()" class="absolute top-6 right-6 px-3 py-1.5 rounded-xl border dark:border-slate-700 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 z-20 cursor-pointer shadow-sm" title="Ganti Tema">
+            <span id="themeLabel" class="text-[10px] font-extrabold tracking-widest uppercase text-main">Theme</span>
         </button>
 
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-xl font-extrabold text-main">Antrian Digital</h1>
-            <p class="text-muted text-xs mt-1 font-medium">Enterprise Management System</p>
+            <h1 class="text-2xl font-extrabold text-main">Antrian Digital</h1>
+            <p class="text-muted text-xs mt-1 font-semibold">Enterprise Management System</p>
         </div>
 
         <!-- Jam & Tanggal -->
-        <div class="mb-6 p-3 rounded-2xl dark:bg-slate-900/50 light:bg-slate-50 border dark:border-slate-800 light:border-slate-200 flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-muted">
+        <div class="mb-6 p-3 rounded-2xl dark:bg-slate-800/80 light:bg-slate-100 border dark:border-slate-700 light:border-slate-300 flex justify-between items-center text-xs font-bold text-main">
             <span id="realDate">--/--/----</span>
-            <span id="realClock" class="font-mono text-main">00:00:00</span>
+            <span id="realClock" class="font-mono">00:00:00</span>
         </div>
 
         <!-- Form Pendaftaran -->
         <div id="formContainer">
-            <form id="queueForm" class="space-y-3">
+            <form id="queueForm" class="space-y-4">
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">Nama Lengkap</label>
-                    <input type="text" id="nama" required class="w-full px-4 py-3 rounded-xl border dark:bg-slate-900 light:bg-white dark:border-slate-700 light:border-slate-300 text-sm text-main focus:ring-2 focus:ring-slate-400 outline-none transition" placeholder="Contoh: Sarah Wijaya">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Nama Lengkap</label>
+                    <input type="text" id="nama" required class="w-full px-4 py-3.5 rounded-xl border dark:bg-slate-900 light:bg-slate-50 dark:border-slate-600 light:border-slate-300 text-sm font-semibold text-main focus:ring-2 focus:ring-slate-400 outline-none transition" placeholder="Contoh: Sarah Wijaya">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-muted mb-1.5">Nomor WhatsApp <span class="font-normal opacity-70">(Opsional)</span></label>
-                    <input type="tel" id="telepon" class="w-full px-4 py-3 rounded-xl border dark:bg-slate-900 light:bg-white dark:border-slate-700 light:border-slate-300 text-sm text-main focus:ring-2 focus:ring-slate-400 outline-none transition" placeholder="Contoh: 08123456789">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-muted mb-1.5">Nomor WhatsApp <span class="font-normal opacity-80">(Opsional)</span></label>
+                    <input type="tel" id="telepon" class="w-full px-4 py-3.5 rounded-xl border dark:bg-slate-900 light:bg-slate-50 dark:border-slate-600 light:border-slate-300 text-sm font-semibold text-main focus:ring-2 focus:ring-slate-400 outline-none transition" placeholder="Contoh: 08123456789">
                 </div>
-                <button type="submit" id="btnSubmit" class="w-full mt-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-3.5 rounded-xl text-sm hover:opacity-90 transition shadow-md cursor-pointer">
+                <button type="submit" id="btnSubmit" class="w-full mt-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-extrabold py-4 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
                     Ambil Nomor Antrian
                 </button>
             </form>
@@ -63,37 +64,37 @@
 
         <!-- Kartu Hasil Sukses & Live Status -->
         <div id="resultContainer" class="hidden space-y-4">
-            <div class="text-center p-6 rounded-3xl border dark:border-slate-800 light:border-slate-200 dark:bg-slate-900/50 light:bg-slate-50">
-                <p class="text-[9px] font-bold uppercase tracking-widest opacity-50">Nomor Antrian Anda</p>
+            <div class="text-center p-6 rounded-3xl border dark:border-slate-700 light:border-slate-300 dark:bg-slate-800/80 light:bg-slate-50 shadow-sm">
+                <p class="text-[10px] font-extrabold uppercase tracking-widest text-muted">Nomor Antrian Anda</p>
                 <h2 id="displayNo" class="text-5xl font-black text-main my-2">-</h2>
-                <p id="displayName" class="text-muted font-medium text-xs"></p>
+                <p id="displayName" class="text-main font-bold text-sm"></p>
             </div>
             
-            <div class="flex justify-between items-center p-4 rounded-2xl border dark:border-slate-800 light:border-slate-200 dark:bg-slate-900/50 light:bg-slate-50">
+            <div class="flex justify-between items-center p-4 rounded-2xl border dark:border-slate-700 light:border-slate-300 dark:bg-slate-800/80 light:bg-slate-50">
                 <div class="text-left">
-                    <p class="text-[10px] font-bold uppercase tracking-wider text-muted">Sisa Antrian</p>
-                    <p id="statusInfoText" class="text-[10px] text-muted font-medium">Estimasi Real-time</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-muted">Sisa Antrian</p>
+                    <p id="statusInfoText" class="text-xs text-main font-semibold">Estimasi Real-time</p>
                 </div>
                 <div class="text-right">
-                    <span id="displayWaiting" class="text-xl font-black text-main">0</span>
-                    <span class="text-xs text-muted ml-1">orang</span>
+                    <span id="displayWaiting" class="text-2xl font-black text-main">0</span>
+                    <span class="text-xs text-muted font-bold ml-1">orang</span>
                 </div>
             </div>
 
             <!-- Daftar Live Status -->
-            <div class="dark:bg-slate-900/50 light:bg-slate-50 border dark:border-slate-800 light:border-slate-200 rounded-2xl p-3">
-                <p class="text-[10px] font-bold uppercase tracking-wider text-muted mb-2 px-1">Live Status Antrian</p>
-                <div class="max-h-40 overflow-y-auto space-y-2 pr-1" id="liveQueueList">
+            <div class="dark:bg-slate-800/80 light:bg-slate-50 border dark:border-slate-700 light:border-slate-300 rounded-2xl p-3.5 shadow-sm">
+                <p class="text-xs font-bold uppercase tracking-wider text-muted mb-2.5 px-1">Live Status Antrian</p>
+                <div class="max-h-40 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList">
                     <!-- List dirender secara otomatis -->
                 </div>
             </div>
 
-            <div class="flex items-center justify-center space-x-2 pt-3 border-t dark:border-slate-800 light:border-slate-200 text-[10px] font-medium text-muted text-center">
+            <div class="flex items-center justify-center space-x-2 pt-3 border-t dark:border-slate-700 light:border-slate-300 text-xs font-bold text-muted text-center">
                 <span>✓ Anda sudah terdaftar di dalam antrian.</span>
             </div>
         </div>
         
-        <div class="text-center mt-6 text-[10px] font-semibold text-muted tracking-wider uppercase opacity-75">
+        <div class="text-center mt-6 text-[10px] font-bold text-muted tracking-widest uppercase">
             Enterprise Queue Management
         </div>
     </div>
@@ -235,12 +236,12 @@
             }
 
             listContainer.innerHTML += `
-                <div class="p-2.5 rounded-xl border dark:border-slate-800 light:border-slate-200 dark:bg-slate-900/60 light:bg-white flex justify-between items-center text-xs">
-                    <div class="flex items-center space-x-2">
-                        <span class="font-extrabold text-main text-xs dark:bg-slate-800 light:bg-slate-100 px-2 py-0.5 rounded-md border dark:border-slate-700 light:border-slate-200">${qNo}</span>
-                        <span class="text-muted font-medium truncate max-w-[110px]">${qNama} <span class="text-main font-bold">(Anda)</span></span>
+                <div class="p-3 rounded-xl border dark:border-slate-700 light:border-slate-300 dark:bg-slate-900 light:bg-white flex justify-between items-center text-xs shadow-sm">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="font-black text-main text-sm dark:bg-slate-800 light:bg-slate-100 px-2 py-0.5 rounded-md border dark:border-slate-700 light:border-slate-300">${qNo}</span>
+                        <span class="text-main font-bold truncate max-w-[120px]">${qNama} <span class="font-extrabold underline">(Anda)</span></span>
                     </div>
-                    <span class="px-2 py-0.5 rounded-md text-[9px] uppercase tracking-wider dark:bg-slate-800 light:bg-slate-100 text-muted font-bold">Menunggu</span>
+                    <span class="px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider dark:bg-slate-800 light:bg-slate-100 text-main font-bold border dark:border-slate-700 light:border-slate-300">Menunggu</span>
                 </div>
             `;
             document.getElementById("displayWaiting").innerText = "0";
@@ -256,7 +257,7 @@
                     listContainer.innerHTML = ""; 
 
                     if (data.list.length === 0) {
-                        listContainer.innerHTML = `<p class="text-xs text-muted text-center py-2 font-medium">Belum ada antrian</p>`;
+                        listContainer.innerHTML = `<p class="text-xs text-muted text-center py-3 font-bold">Belum ada antrian</p>`;
                         return;
                     }
 
@@ -280,30 +281,30 @@
                     }
 
                     data.list.forEach(item => {
-                        let badgeClass = "dark:bg-slate-800 light:bg-slate-100 text-muted dark:border-slate-700 light:border-slate-200";
+                        let badgeClass = "dark:bg-slate-800 light:bg-slate-100 text-main dark:border-slate-700 light:border-slate-300";
                         let statusText = item.status;
 
                         if (item.status === "menunggu") {
-                            badgeClass = "dark:bg-slate-800 light:bg-slate-100 text-muted dark:border-slate-700 light:border-slate-200";
+                            badgeClass = "dark:bg-slate-800 light:bg-slate-100 text-main dark:border-slate-700 light:border-slate-300";
                             statusText = "Menunggu";
                         } else if (item.status === "dipanggil") {
-                            badgeClass = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-bold animate-pulse";
+                            badgeClass = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-black animate-pulse";
                             statusText = "Dipanggil";
                         } else if (item.status === "selesai") {
-                            badgeClass = "dark:bg-slate-800/50 light:bg-slate-100 text-muted opacity-60";
+                            badgeClass = "dark:bg-slate-800 light:bg-slate-200 text-muted opacity-70";
                             statusText = "Selesai";
                         }
 
                         let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
-                        let cardHighlight = isMyNumber ? "border-slate-400 dark:border-slate-600 dark:bg-slate-800/40 light:bg-slate-100" : "dark:border-slate-800 light:border-slate-200 dark:bg-slate-900/30 light:bg-white";
+                        let cardHighlight = isMyNumber ? "border-slate-400 dark:border-slate-400 dark:bg-slate-800 light:bg-slate-100 shadow-md" : "dark:border-slate-700 light:border-slate-300 dark:bg-slate-900 light:bg-white";
 
                         listContainer.innerHTML += `
-                            <div class="p-2.5 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs transition-all">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-extrabold text-main text-xs dark:bg-slate-800 light:bg-slate-100 px-2 py-0.5 rounded-md border dark:border-slate-700 light:border-slate-200">${item.noAntrian}</span>
-                                    <span class="text-muted font-medium truncate max-w-[110px]">${item.nama} ${isMyNumber ? '<span class="text-main font-bold">(Anda)</span>' : ''}</span>
+                            <div class="p-3 rounded-xl border ${cardHighlight} flex justify-between items-center text-xs transition-all shadow-sm">
+                                <div class="flex items-center space-x-2.5">
+                                    <span class="font-black text-main text-sm dark:bg-slate-800 light:bg-slate-100 px-2.5 py-0.5 rounded-md border dark:border-slate-700 light:border-slate-300">${item.noAntrian}</span>
+                                    <span class="text-main font-bold truncate max-w-[120px]">${item.nama} ${isMyNumber ? '<span class="font-extrabold underline">(Anda)</span>' : ''}</span>
                                 </div>
-                                <span class="px-2 py-0.5 rounded-md text-[9px] uppercase tracking-wider border ${badgeClass} font-semibold">${statusText}</span>
+                                <span class="px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider border ${badgeClass} font-bold">${statusText}</span>
                             </div>
                         `;
                     });
