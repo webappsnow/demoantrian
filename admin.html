@@ -303,7 +303,7 @@
                 });
         }
 
-        function downloadExcel() {
+      function downloadExcel() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -312,7 +312,8 @@
                         return;
                     }
 
-                    let csvContent = "\uFEFFNo Antrian,Nama,Telepon,Status,Waktu,Loket\n";
+                    // Menggunakan titik koma (;) agar otomatis terpisah per kolom di Excel wilayah Indonesia
+                    let csvContent = "\uFEFFNo Antrian;Nama;Telepon;Status;Waktu;Loket\n";
 
                     data.list.forEach(item => {
                         let waktuBersih = formatWaktuAman(item.waktu);
@@ -324,7 +325,8 @@
                             `"${waktuBersih}"`,
                             `"${item.loket || '-'}"`
                         ];
-                        csvContent += rowData.join(",") + "\n";
+                        // Menggabungkan menggunakan titik koma (;)
+                        csvContent += rowData.join(";") + "\n";
                     });
 
                     let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
