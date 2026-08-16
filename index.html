@@ -79,13 +79,34 @@
         </div>
     </div>
 
-    <script>
+   <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let autoUpdateInterval = null;
-        let myRegisteredQueueNo = null;
+        let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
+
+        // Cek otomatis saat halaman dimuat: Jika sebelumnya sudah pernah antri, langsung tampilkan kartu statusnya!
+        window.addEventListener("DOMContentLoaded", () => {
+            if (myRegisteredQueueNo) {
+                document.getElementById("formContainer").classList.add("hidden");
+                document.getElementById("resultContainer").classList.remove("hidden");
+                document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                document.getElementById("displayName").innerText = localStorage.getItem("my_queue_name") || "Pelanggan";
+                
+                fetchAllQueueStatus();
+                autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+            }
+        });
 
         document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
+            
+            // Pencegahan ekstra: Jika di localStorage sudah ada nomor, jangan biarkan daftar lagi!
+            if (localStorage.getItem("my_queue_number")) {
+                alert("Anda sudah terdaftar di dalam antrian!");
+                location.reload();
+                return;
+            }
+
             const btn = document.getElementById("btnSubmit");
             btn.disabled = true;
             btn.innerText = "Memproses...";
@@ -93,13 +114,11 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // 1. Ambil data server dulu sebentar untuk tahu nomor terakhir, atau langsung hitung dari total list
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     let nextNum = 1;
                     if (data && data.list && data.list.length > 0) {
-                        // Cari nomor urut terbesar dari daftar yang ada
                         let maxNum = 0;
                         data.list.forEach(item => {
                             let parsed = parseInt(item.noAntrian.toString().replace(/\D/g, ''));
@@ -112,28 +131,30 @@
 
                     myRegisteredQueueNo = "A-" + ("000" + nextNum).slice(-3);
 
-                    // Tampilkan langsung di layar seketika tanpa menunggu lama
+                    // Simpan permanen di browser agar aman saat direfresh
+                    localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                    localStorage.setItem("my_queue_name", nama);
+
                     document.getElementById("formContainer").classList.add("hidden");
                     document.getElementById("resultContainer").classList.remove("hidden");
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
-                    // 2. Kirim data pendaftaran ke Google Sheets di latar belakang
+                    // Kirim ke Google Sheets di latar belakang
                     fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                         method: "GET",
                         mode: "no-cors"
                     });
 
-                    // 3. Jalankan pemantauan live status berkala
                     fetchAllQueueStatus();
                     if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-                    autoUpdateInterval = setInterval(() => {
-                        fetchAllQueueStatus();
-                    }, 4000);
+                    autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
                 })
                 .catch(() => {
-                    // Fallback darurat jika fetch getQueue awal gagal
                     myRegisteredQueueNo = "A-001";
+                    localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                    localStorage.setItem("my_queue_name", nama);
+
                     document.getElementById("formContainer").classList.add("hidden");
                     document.getElementById("resultContainer").classList.remove("hidden");
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
@@ -147,7 +168,8 @@
                     fetchAllQueueStatus();
                 });
         });
-function fetchAllQueueStatus() {
+
+        function fetchAllQueueStatus() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
@@ -175,7 +197,7 @@ function fetchAllQueueStatus() {
                     }
 
                     const listContainer = document.getElementById("liveQueueList");
-                    listContainer.innerHTML = ""; // <-- Ini wajib ada agar tulisan "Memuat..." terhapus bersih
+                    listContainer.innerHTML = "";
 
                     if (data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-2">Belum ada antrian</p>`;
