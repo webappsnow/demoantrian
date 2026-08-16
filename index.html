@@ -78,9 +78,8 @@
             Powered by Universal Queue SaaS System
         </div>
     </div>
-
-  <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
+<script>
+        const SCRIPT_URL = "MASUKKAN_URL_GAS_ANDA_DISINI";
         let autoUpdateInterval = null;
 
         document.getElementById("queueForm").addEventListener("submit", function(e) {
@@ -92,30 +91,24 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // 1. Kirim data pendaftaran ke Google Sheets
+            // 1. Kirim data pendaftaran (tanpa menunggu balasan JSON karena mode no-cors)
             fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                 method: "GET",
                 mode: "no-cors"
-            })
-            .then(() => {
-                // 2. Beri jeda 1 detik agar Google Sheets sempat menyimpan baris baru, lalu tarik datanya
-                setTimeout(() => {
-                    fetchAndShowMyNumber(nama);
-                }, 1000);
-            })
-            .catch(err => {
-                alert("Terjadi kesalahan koneksi.");
-                btn.disabled = false;
-                btn.innerText = "Ambil Nomor Antrian";
             });
+
+            // 2. Beri jeda 1,5 detik agar Google Sheets selesai menulis, lalu ambil nomor antrian terbaru berdasarkan nama
+            setTimeout(() => {
+                fetchAndShowMyNumber(nama);
+            }, 1500);
         });
 
         function fetchAndShowMyNumber(targetNama) {
             fetch(`${SCRIPT_URL}?action=getQueue`)
                 .then(res => res.json())
                 .then(data => {
-                    // Cari data antrian yang namanya sama persis dan statusnya masih menunggu
-                    let found = data.list.slice().reverse().find(item => item.nama.toLowerCase() === targetNama.toLowerCase() && item.status === "menunggu");
+                    // Cari data antrian yang namanya sama persis dan statusnya menunggu
+                    let found = data.list.slice().reverse().find(item => item.nama.toLowerCase() === targetNama.toLowerCase());
                     
                     if (found) {
                         document.getElementById("formContainer").classList.add("hidden");
@@ -131,7 +124,7 @@
                             fetchAllQueueStatus(found.noAntrian);
                         }, 4000);
                     } else {
-                        // Jika belum ketemu di baris atas, coba ambil data paling terakhir di tabel
+                        // Jika tidak ketemu lewat pencarian nama, ambil baris paling akhir di spreadsheet
                         let lastItem = data.list[data.list.length - 1];
                         if (lastItem) {
                             document.getElementById("formContainer").classList.add("hidden");
@@ -142,14 +135,15 @@
                             
                             fetchAllQueueStatus(lastItem.noAntrian);
                         } else {
-                            alert("Gagal memuat nomor antrian, silakan refresh halaman.");
+                            alert("Gagal memuat nomor antrian, silakan coba lagi.");
                             location.reload();
                         }
                     }
                 })
                 .catch(() => {
                     alert("Gagal terhubung ke server antrian.");
-                    location.reload();
+                    document.getElementById("btnSubmit").disabled = false;
+                    document.getElementById("btnSubmit").innerText = "Ambil Nomor Antrian";
                 });
         }
 
