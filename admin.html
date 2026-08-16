@@ -8,30 +8,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
         .dark body { background-color: #020617; color: #ffffff; }
         .dark .glass-card { background: #0f172a; border: 2px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         .dark .box-element { background: #1e293b; border-color: #475569; color: #ffffff; }
         .dark .btn-theme { background-color: #ffffff; color: #000000; }
-        
         .light body { background-color: #f1f5f9; color: #000000; }
         .light .glass-card { background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
         .light .box-element { background: #ffffff; border-color: #cbd5e1; color: #000000; }
         .light .btn-theme { background-color: #000000; color: #ffffff; }
-
         .text-main { color: #000000; }
         .dark .text-main { color: #ffffff; }
-        
         .text-muted { color: #334155; }
         .dark .text-muted { color: #cbd5e1; }
     </style>
 </head>
 <body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
     
-    <!-- Modern Custom Modal / Popup -->
+    <!-- Modal Lock Screen (PIN Gembok) -->
+    <div id="lockModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-sm glass-card rounded-3xl p-6 text-center border-2 shadow-2xl space-y-4">
+            <div class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-main">Panel Terkunci</h3>
+                <p class="text-xs sm:text-sm text-muted font-bold mt-1">Masukkan PIN Admin dari Sheet Info</p>
+            </div>
+            <div class="space-y-3">
+                <input type="password" id="pinInput" placeholder="Masukkan PIN Admin" class="w-full box-element border-2 text-center font-black py-3 rounded-xl text-sm focus:outline-none focus:border-emerald-500">
+                <button onclick="unlockPanel()" id="btnLogin" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition cursor-pointer shadow-md">
+                    Buka Panel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal / Popup -->
     <div id="customModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-sm glass-card rounded-3xl p-6 text-center border-2 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
-            <div id="modalIconContainer" class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
+            <div class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -41,7 +58,7 @@
                 <p id="modalMessage" class="text-xs sm:text-sm text-muted font-bold mt-2">Pesan informasi sistem.</p>
             </div>
             <div id="modalButtonContainer" class="space-y-2">
-                <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
+                <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition cursor-pointer shadow-md">
                     OK, Mengerti
                 </button>
             </div>
@@ -50,36 +67,46 @@
 
     <div class="w-full max-w-4xl glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all space-y-6">
         
-        <!-- Logo di Pojok Kiri Atas -->
+        <!-- Logo -->
         <img src="logo.png" alt="Logo" class="absolute top-6 left-6 w-11 h-11 rounded-xl shadow-sm border dark:border-slate-600 light:border-slate-300 object-cover z-20" onerror="this.style.display='none'">
 
-        <!-- Tombol Ganti Tema di Pojok Kanan Atas -->
-        <button onclick="toggleTheme()" class="absolute top-6 right-6 p-2.5 rounded-xl border-2 dark:border-slate-600 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 z-20 cursor-pointer shadow-sm" title="Ganti Tema">
-            <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden dark:text-amber-400 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 dark:text-slate-200 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-        </button>
+        <!-- Tombol Aksi Kanan Atas -->
+        <div class="absolute top-6 right-6 flex items-center space-x-2 z-20">
+            <button onclick="lockPanel()" class="p-2.5 rounded-xl border-2 dark:border-slate-600 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 cursor-pointer shadow-sm" title="Kunci Panel">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </button>
+            <button onclick="toggleTheme()" class="p-2.5 rounded-xl border-2 dark:border-slate-600 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 cursor-pointer shadow-sm" title="Ganti Tema">
+                <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden dark:text-amber-400 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 dark:text-slate-200 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </div>
 
-        <!-- Header Panel -->
+        <!-- Header -->
         <div class="text-center sm:text-left pt-2 sm:pl-14">
             <h2 class="text-lg font-black text-main tracking-tight">Klinik Sehat Utama</h2>
             <h1 class="text-2xl font-black text-main mt-1">Panel Admin</h1>
             <p class="text-muted text-xs sm:text-sm font-semibold mt-0.5">Kelola pemanggilan antrian secara real-time</p>
         </div>
 
-        <!-- Indikator Sistem Aktif -->
-        <div class="box-element border-2 rounded-2xl p-4 flex justify-between items-center shadow-inner">
-            <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Status Server</span>
+        <!-- Status Server & Kontrol Buka/Tutup Antrean -->
+        <div class="box-element border-2 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-center gap-3 shadow-inner">
             <div class="flex items-center space-x-2">
                 <span class="relative flex h-3 w-3">
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
-                <span class="px-3 py-1 box-element border-2 text-emerald-500 text-xs font-black rounded-full uppercase tracking-wider">Sistem Aktif</span>
+                <span class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Sistem Server Aktif</span>
             </div>
+            
+            <button onclick="toggleQueueStatus()" id="btnToggleStatus" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm cursor-pointer border-2">
+                Memuat Status...
+            </button>
         </div>
 
         <!-- Kontrol Utama -->
@@ -154,6 +181,66 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let modalCallback = null;
 
+        // Verifikasi PIN ke Google Sheet Info
+        function unlockPanel() {
+            let pin = document.getElementById("pinInput").value;
+            let btn = document.getElementById("btnLogin");
+            if (!pin) return;
+
+            btn.disabled = true;
+            btn.innerText = "Memeriksa...";
+
+            fetch(`${SCRIPT_URL}?action=verifyPin&pin=${pin}`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerText = "Buka Panel";
+                    if (data.status === "success") {
+                        document.getElementById("lockModal").classList.add("hidden");
+                        document.getElementById("pinInput").value = "";
+                    } else {
+                        showModal("PIN Salah", "PIN yang Anda masukkan tidak valid dengan database.");
+                        document.getElementById("pinInput").value = "";
+                    }
+                })
+                .catch(() => {
+                    btn.disabled = false;
+                    btn.innerText = "Buka Panel";
+                    showModal("Kesalahan", "Gagal menghubungi server.");
+                });
+        }
+
+        function lockPanel() {
+            document.getElementById("lockModal").classList.remove("hidden");
+        }
+
+        document.getElementById("pinInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") unlockPanel();
+        });
+
+        // Kontrol Tombol Buka / Tutup Antrean via Sheet Info
+        function toggleQueueStatus() {
+            fetch(`${SCRIPT_URL}?action=toggleStatus`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        updateStatusButtonUI(data.queueStatus);
+                    }
+                    loadQueue();
+                });
+        }
+
+        function updateStatusButtonUI(status) {
+            let btn = document.getElementById("btnToggleStatus");
+            if (status.toLowerCase() === "buka") {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm cursor-pointer border-2 bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-500";
+                btn.innerText = "Status: Buka (Klik untuk Tutup)";
+            } else {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm cursor-pointer border-2 bg-rose-600 hover:bg-rose-700 text-white border-rose-500";
+                btn.innerText = "Status: Tutup (Klik untuk Buka)";
+            }
+        }
+
         function showModal(title, message, callback = null, isConfirm = false) {
             document.getElementById("modalTitle").innerText = title;
             document.getElementById("modalMessage").innerText = message;
@@ -177,96 +264,44 @@
             }
         }
 
-        function closeModal() {
-            document.getElementById("customModal").classList.add("hidden");
-            modalCallback = null;
-        }
-
-        function executeConfirm() {
-            if (modalCallback) {
-                modalCallback();
-            }
-            closeModal();
-        }
+        function closeModal() { document.getElementById("customModal").classList.add("hidden"); modalCallback = null; }
+        function executeConfirm() { if (modalCallback) modalCallback(); closeModal(); }
 
         function toggleTheme() {
             const html = document.documentElement;
-            const iconSun = document.getElementById("iconSun");
-            const iconMoon = document.getElementById("iconMoon");
-
-            if (html.classList.contains("dark")) {
-                html.classList.remove("dark");
-                html.classList.add("light");
-                localStorage.setItem("theme", "light");
-                iconSun.classList.remove("hidden");
-                iconMoon.classList.add("hidden");
-            } else {
-                html.classList.remove("light");
-                html.classList.add("dark");
-                localStorage.setItem("theme", "dark");
-                iconSun.classList.add("hidden");
-                iconMoon.classList.remove("hidden");
-            }
+            html.classList.toggle("dark");
+            html.classList.toggle("light");
+            localStorage.setItem("theme", html.classList.contains("dark") ? "dark" : "light");
         }
 
         (function() {
             const savedTheme = localStorage.getItem("theme") || "dark";
-            const html = document.documentElement;
-            if (savedTheme === "light") {
-                html.classList.remove("dark");
-                html.classList.add("light");
-            } else {
-                html.classList.remove("light");
-                html.classList.add("dark");
-            }
+            document.documentElement.classList.add(savedTheme);
         })();
 
         window.addEventListener("DOMContentLoaded", () => {
-            const savedTheme = localStorage.getItem("theme") || "dark";
-            const iconSun = document.getElementById("iconSun");
-            const iconMoon = document.getElementById("iconMoon");
-
-            if (savedTheme === "light") {
-                iconSun.classList.remove("hidden");
-                iconMoon.classList.add("hidden");
-            } else {
-                iconSun.classList.add("hidden");
-                iconMoon.classList.remove("hidden");
-            }
-
-            // Trik "Wake-up": Mengaktifkan mesin suara browser agar tidak delay di klik pertama
             if ('speechSynthesis' in window) {
                 let wakeUp = new SpeechSynthesisUtterance("");
                 window.speechSynthesis.speak(wakeUp);
             }
-
             loadQueue();
         });
 
-        // Fungsi Suara (Text-to-Speech) - Diulang 2 kali otomatis
         function speakQueue(noAntrian) {
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
-
             let cleanNo = noAntrian.toString().replace("-", " ");
             let msgText = `Nomor antrian ${cleanNo}, silakan menuju ruangan.`;
-            
             for (let i = 0; i < 2; i++) {
-                let utterance = new SpeechSynthesisUtterance(msgText);
-                utterance.lang = 'id-ID';
-                utterance.rate = 0.95;
-                utterance.pitch = 1.0;
-                utterance.volume = 1.0;
-                window.speechSynthesis.speak(utterance);
+                let u = new SpeechSynthesisUtterance(msgText);
+                u.lang = 'id-ID'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
             }
         }
 
-        // Fungsi Panggil Ulang (Re-Call) nomor yang sedang aktif
         function reSpeak() {
             let currentNo = document.getElementById("currentCall").innerText;
-            if (currentNo !== "-") {
-                speakQueue(currentNo);
-            }
+            if (currentNo !== "-") speakQueue(currentNo);
         }
 
         function formatWaktuAman(rawWaktu) {
@@ -274,9 +309,7 @@
             let strWaktu = rawWaktu.toString();
             if (strWaktu.includes("1899") || strWaktu.includes("T")) {
                 let d = new Date(rawWaktu);
-                if (!isNaN(d.getTime())) {
-                    return d.toLocaleTimeString('id-ID', { hour12: false });
-                }
+                if (!isNaN(d.getTime())) return d.toLocaleTimeString('id-ID', { hour12: false });
             }
             return strWaktu;
         }
@@ -286,6 +319,11 @@
                 .then(res => res.json())
                 .then(data => {
                     if (!data) return;
+
+                    // Update status buka/tutup antrean dari sheet
+                    if (data.queueStatus) {
+                        updateStatusButtonUI(data.queueStatus);
+                    }
 
                     if (data.current) {
                         document.getElementById("currentCall").innerText = data.current.noAntrian;
@@ -313,7 +351,6 @@
                         let actionButton = "";
 
                         if (item.status === "menunggu") {
-                            badgeStyle = "box-element text-main";
                             statusText = "Menunggu";
                         } else if (item.status === "dipanggil") {
                             badgeStyle = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-black animate-pulse";
@@ -343,24 +380,19 @@
                         `;
                     });
                 })
-                .catch(err => {
-                    console.error("Gagal memuat antrian:", err);
-                });
+                .catch(err => console.error("Gagal memuat antrian:", err));
         }
 
-   function callNext() {
+        function callNext() {
             const btn = document.getElementById("btnNext");
             btn.disabled = true;
             btn.innerText = "Memproses...";
 
-            // Mengirim request ke Google Apps Script
             fetch(`${SCRIPT_URL}?action=next&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
                     btn.disabled = false;
                     btn.innerText = "Panggil Berikutnya";
-                    
-                    // Jika server sukses mengembalikan nomor antrian, langsung bunyikan suara seketika
                     if (data.status === "success" && data.noAntrian) {
                         speakQueue(data.noAntrian);
                     } else if (data.status === "empty") {
@@ -368,44 +400,18 @@
                     }
                     loadQueue();
                 })
-                .catch(() => {
-                    btn.disabled = false;
-                    btn.innerText = "Panggil Berikutnya";
-                    loadQueue();
-                });
+                .catch(() => { btn.disabled = false; btn.innerText = "Panggil Berikutnya"; loadQueue(); });
         }
 
         function skipCurrent() {
-            const btn = document.getElementById("btnSkip");
-            btn.disabled = true;
-            btn.innerText = "Melewati...";
-
             fetch(`${SCRIPT_URL}?action=skip&loket=Loket 1`, { method: "GET", redirect: "follow" })
-                .then(res => res.json())
-                .then(data => {
-                    btn.disabled = false;
-                    btn.innerText = "Lewati (Skip)";
-                    loadQueue();
-                })
-                .catch(() => {
-                    btn.disabled = false;
-                    btn.innerText = "Lewati (Skip)";
-                    loadQueue();
-                });
+                .then(res => res.json()).then(() => loadQueue());
         }
 
         function callSpecific(noAntrian) {
-            // Bunyikan suara seketika saat tombol panggil diklik
             speakQueue(noAntrian);
-
             fetch(`${SCRIPT_URL}?action=callSpecific&no=${noAntrian}&loket=Loket 1`, { method: "GET", redirect: "follow" })
-                .then(res => res.json())
-                .then(data => {
-                    loadQueue();
-                })
-                .catch(err => {
-                    console.error("Gagal memanggil ulang:", err);
-                });
+                .then(res => res.json()).then(() => loadQueue());
         }
 
         function downloadExcel() {
@@ -413,55 +419,27 @@
                 .then(res => res.json())
                 .then(data => {
                     if (!data || !data.list || data.list.length === 0) {
-                        showModal("Informasi", "Tidak ada data pengunjung untuk diunduh hari ini.");
+                        showModal("Informasi", "Tidak ada data untuk diunduh.");
                         return;
                     }
-
-                    let csvContent = "\uFEFFNo Antrian;Nama;Telepon;Status;Waktu;Loket\n";
-
-                    data.list.forEach(item => {
-                        let waktuBersih = formatWaktuAman(item.waktu);
-                        let rowData = [
-                            `"${item.noAntrian || ''}"`,
-                            `"${item.nama || ''}"`,
-                            `"${item.telepon || '-'}"`,
-                            `"${item.status || ''}"`,
-                            `"${waktuBersih}"`,
-                            `"${item.loket || '-'}"`
-                        ];
-                        csvContent += rowData.join(";") + "\n";
+                    let csv = "\uFEFFNo Antrian;Nama;Telepon;Status;Waktu;Loket\n";
+                    data.list.forEach(i => {
+                        csv += `"${i.noAntrian}";"${i.nama}";"${i.telepon || '-'}";"${i.status}";"${formatWaktuAman(i.waktu)}";"${i.loket || '-'}"\n`;
                     });
-
-                    let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    let url = URL.createObjectURL(blob);
                     let a = document.createElement('a');
-                    a.setAttribute('href', url);
-                    
-                    let todayStr = new Date().toISOString().slice(0, 10);
-                    a.setAttribute('download', `Rekap_Antrian_${todayStr}.csv`);
-                    
-                    document.body.appendChild(a);
+                    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+                    a.download = `Rekap_Antrian_${new Date().toISOString().slice(0, 10)}.csv`;
                     a.click();
-                    document.body.removeChild(a);
-                })
-                .catch(err => {
-                    console.error("Gagal mengunduh data:", err);
-                    showModal("Gagal", "Gagal mengunduh rekap data.");
                 });
         }
 
         function confirmResetData() {
-            showModal("Konfirmasi Reset", "Yakin ingin mereset seluruh antrian hari ini? Data di Google Sheets akan dikosongkan.", () => {
+            showModal("Konfirmasi Reset", "Yakin ingin mereset seluruh antrian hari ini?", () => {
                 fetch(`${SCRIPT_URL}?action=reset`, { method: "GET", redirect: "follow" })
-                    .then(res => res.json())
-                    .then(data => {
-                        showModal("Berhasil", "Antrian berhasil direset!");
-                        loadQueue();
-                    });
+                    .then(res => res.json()).then(() => { showModal("Berhasil", "Antrian direset!"); loadQueue(); });
             }, true);
         }
 
-        // Auto Refresh tiap 4 detik
         setInterval(loadQueue, 4000);
         loadQueue();
     </script>
