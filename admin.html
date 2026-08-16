@@ -28,7 +28,7 @@
 </head>
 <body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
     
-    <!-- Modern Custom Modal / Popup (Menggantikan alert/confirm bawaan browser) -->
+    <!-- Modern Custom Modal / Popup -->
     <div id="customModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-sm glass-card rounded-3xl p-6 text-center border-2 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
             <div id="modalIconContainer" class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
@@ -232,6 +232,23 @@
             loadQueue();
         });
 
+        // Fungsi Suara (Text-to-Speech)
+        function speakQueue(noAntrian) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            let cleanNo = noAntrian.toString().replace("-", " ");
+            let msgText = `Nomor antrian ${cleanNo}, silakan menuju ruangan.`;
+            
+            let utterance = new SpeechSynthesisUtterance(msgText);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
         function formatWaktuAman(rawWaktu) {
             if (!rawWaktu) return "-";
             let strWaktu = rawWaktu.toString();
@@ -320,6 +337,9 @@
                 .then(data => {
                     btn.disabled = false;
                     btn.innerText = "Panggil Berikutnya";
+                    if (data.status === "success") {
+                        speakQueue(data.noAntrian);
+                    }
                     loadQueue();
                 })
                 .catch(() => {
@@ -352,6 +372,9 @@
             fetch(`${SCRIPT_URL}?action=callSpecific&no=${noAntrian}&loket=Loket 1`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
+                    if (data.status === "success") {
+                        speakQueue(noAntrian);
+                    }
                     loadQueue();
                 })
                 .catch(err => {
