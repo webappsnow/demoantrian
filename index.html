@@ -102,16 +102,16 @@
             
             <div class="flex justify-between items-center p-4 rounded-2xl border-2 box-element">
                 <div class="text-left">
-                    <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Sisa Antrian</p>
+                    <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Status / Sisa Antrian</p>
                     <p id="statusInfoText" class="text-xs sm:text-sm text-main font-extrabold">Estimasi Real-time</p>
                 </div>
                 <div class="text-right">
-                    <span id="displayWaiting" class="text-3xl font-black text-main">0</span>
-                    <span class="text-xs sm:text-sm text-muted font-black ml-1">orang</span>
+                    <span id="displayWaiting" class="text-2xl sm:text-3xl font-black text-main">0</span>
+                    <span id="unitOrang" class="text-xs sm:text-sm text-muted font-black ml-1">orang</span>
                 </div>
             </div>
 
-            <!-- Daftar Live Status (Dirapikan) -->
+            <!-- Daftar Live Status -->
             <div class="box-element border-2 rounded-2xl p-4 shadow-sm">
                 <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted mb-3 px-1">Live Status Antrian</p>
                 <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList">
@@ -294,6 +294,7 @@
                 </div>
             `;
             document.getElementById("displayWaiting").innerText = "0";
+            document.getElementById("unitOrang").style.display = "inline";
         }
 
         function fetchAllQueueStatus() {
@@ -314,17 +315,26 @@
                     let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
                     let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
 
+                    const displayWaitingEl = document.getElementById("displayWaiting");
+                    const unitOrangEl = document.getElementById("unitOrang");
+                    const statusInfoTextEl = document.getElementById("statusInfoText");
+
                     if (foundInList) {
                         if (foundInList.status === "selesai") {
-                            document.getElementById("statusInfoText").innerText = "Status Anda:";
-                            document.getElementById("displayWaiting").innerText = "SELESAI";
+                            statusInfoTextEl.innerText = "Status Anda:";
+                            displayWaitingEl.innerText = "SELESAI";
+                            unitOrangEl.style.display = "none";
                         } else if (foundInList.status === "dipanggil") {
-                            document.getElementById("statusInfoText").innerText = "Status Anda:";
-                            document.getElementById("displayWaiting").innerText = "GILIRAN!";
+                            statusInfoTextEl.innerText = "Status Anda:";
+                            displayWaitingEl.innerText = "GILIRAN ANDA!";
+                            unitOrangEl.style.display = "none";
                         } else {
+                            statusInfoTextEl.innerText = "Estimasi Real-time";
+                            unitOrangEl.style.display = "inline";
                             if (myIndex !== -1) {
-                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
-                                document.getElementById("displayWaiting").innerText = myIndex;
+                                displayWaitingEl.innerText = myIndex;
+                            } else {
+                                displayWaitingEl.innerText = "0";
                             }
                         }
                     }
