@@ -48,12 +48,11 @@
         <!-- Nama Tempat, Alamat & Header -->
         <div class="text-center mb-6 pt-3">
             <h2 class="text-lg font-black text-main tracking-tight">Klinik Sehat Utama</h2>
-            <!-- Ubah teks alamat di bawah ini sesuai keinginan Anda -->
             <p class="text-muted text-xs font-semibold mt-0.5">Jl. Raya Kesehatan No. 123, Jakarta</p>
             <h1 class="text-2xl font-black text-main mt-3">Antrian Digital</h1>
         </div>
 
-        <!-- Jam & Tanggal (Ukuran Diperbesar & Lebih Menonjol) -->
+        <!-- Jam & Tanggal (Besar & Rapi) -->
         <div class="mb-5 p-4 rounded-2xl box-element border-2 flex flex-col sm:flex-row justify-between items-center text-base sm:text-lg font-black shadow-inner gap-2 sm:gap-0">
             <div class="flex items-center space-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,10 +111,10 @@
                 </div>
             </div>
 
-            <!-- Daftar Live Status -->
+            <!-- Daftar Live Status (Dirapikan) -->
             <div class="box-element border-2 rounded-2xl p-4 shadow-sm">
                 <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted mb-3 px-1">Live Status Antrian</p>
-                <div class="max-h-48 overflow-y-auto space-y-3 pr-1" id="liveQueueList">
+                <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList">
                     <!-- List dirender secara otomatis -->
                 </div>
             </div>
@@ -286,12 +285,12 @@
             }
 
             listContainer.innerHTML += `
-                <div class="p-3.5 rounded-xl border-2 box-element flex justify-between items-center text-sm shadow-sm">
-                    <div class="flex items-center space-x-3">
-                        <span class="font-black text-main text-base box-element px-3 py-1 rounded-lg border-2">${qNo}</span>
-                        <span class="text-main font-bold truncate max-w-[130px]">${qNama} <span class="font-black underline">(Anda)</span></span>
+                <div class="p-3 rounded-xl border-2 box-element flex justify-between items-center text-xs sm:text-sm shadow-sm">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <span class="font-black text-main text-sm sm:text-base box-element px-2.5 py-1 rounded-lg border-2 shrink-0">${qNo}</span>
+                        <span class="text-main font-extrabold truncate max-w-[110px] sm:max-w-[140px]">${qNama} <span class="font-black underline">(Anda)</span></span>
                     </div>
-                    <span class="px-3 py-1 rounded-lg text-xs uppercase tracking-wider box-element text-main font-black border-2">Menunggu</span>
+                    <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider box-element text-main font-black border-2 shrink-0">Menunggu</span>
                 </div>
             `;
             document.getElementById("displayWaiting").innerText = "0";
@@ -307,7 +306,7 @@
                     listContainer.innerHTML = ""; 
 
                     if (data.list.length === 0) {
-                        listContainer.innerHTML = `<p class="text-sm text-muted text-center py-3 font-bold">Belum ada antrian</p>`;
+                        listContainer.innerHTML = `<p class="text-xs sm:text-sm text-muted text-center py-3 font-bold">Belum ada antrian</p>`;
                         return;
                     }
 
@@ -349,12 +348,12 @@
                         let cardHighlight = isMyNumber ? "border-slate-900 dark:border-white shadow-md" : "box-element";
 
                         listContainer.innerHTML += `
-                            <div class="p-3.5 rounded-xl border-2 ${cardHighlight} flex justify-between items-center text-sm transition-all shadow-sm">
-                                <div class="flex items-center space-x-3">
-                                    <span class="font-black text-main text-base box-element px-3 py-1 rounded-lg border-2">${item.noAntrian}</span>
-                                    <span class="text-main font-bold truncate max-w-[130px]">${item.nama} ${isMyNumber ? '<span class="font-black underline">(Anda)</span>' : ''}</span>
+                            <div class="p-3 rounded-xl border-2 ${cardHighlight} flex justify-between items-center text-xs sm:text-sm transition-all shadow-sm">
+                                <div class="flex items-center space-x-3 overflow-hidden">
+                                    <span class="font-black text-main text-sm sm:text-base box-element px-2.5 py-1 rounded-lg border-2 shrink-0">${item.noAntrian}</span>
+                                    <span class="text-main font-extrabold truncate max-w-[110px] sm:max-w-[140px]">${item.nama} ${isMyNumber ? '<span class="font-black underline">(Anda)</span>' : ''}</span>
                                 </div>
-                                <span class="px-3 py-1 rounded-lg text-xs uppercase tracking-wider border-2 ${badgeClass} font-black">${statusText}</span>
+                                <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider border-2 ${badgeClass} font-black shrink-0">${statusText}</span>
                             </div>
                         `;
                     });
