@@ -34,7 +34,8 @@
 </head>
 <body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
     
-    <div class="w-full max-w-sm sm:max-w-md glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all">
+    <!-- Kontainer Utama Aplikasi (Disembunyikan sampai lisensi terverifikasi AKTIF) -->
+    <div id="appContainer" class="w-full max-w-sm sm:max-w-md glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all hidden">
         
         <img src="logo.png" alt="Logo" class="absolute top-5 left-5 w-11 h-11 rounded-xl shadow-sm border dark:border-slate-600 light:border-slate-300 object-cover z-20" onerror="this.style.display='none'">
 
@@ -124,76 +125,36 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
-        const SCRIPT_URL_PUSAT = "https://script.google.com/macros/s/AKfycbzsu-6dxTTR7k6tXcR9Wdeav8Hz7HWSOxt7lG5mLNe59O7zuyzKAFCTSQ8m3BglR3GbiA/exec";
+        const SCRIPT_URL = "URL_ANTREAN_LOKAL_ANDA";
+        const SCRIPT_URL_PUSAT = "URL_APPS_SCRIPT_PUSAT_ANDA";
+        const TOKO_ID = "KLINIK-SEHAT"; // ID unik toko yang terdaftar di sheet pusat
 
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
-        let savedLicenseKey = localStorage.getItem("app_license_key") || "";
 
-        function checkAppLicense() {
-            if (!savedLicenseKey) {
-                showActivationScreen();
-                return;
-            }
-
-            fetch(`${SCRIPT_URL_PUSAT}?kode=${encodeURIComponent(savedLicenseKey)}`, { method: "GET", redirect: "follow" })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status !== "AKTIF") {
-                        localStorage.removeItem("app_license_key");
-                        showActivationScreen("Lisensi Anda tidak aktif atau masa aktifnya habis.");
-                    } else {
-                        initApp(); // Jalankan aplikasi setelah lisensi dipastikan AKTIF
-                    }
-                })
-                .catch(err => {
-                    console.error("Gagal memvalidasi lisensi ke pusat:", err);
-                    showActivationScreen("Gagal terhubung ke server pusat.");
-                });
-        }
-
-        function showActivationScreen(errorMsg = "") {
-            document.body.innerHTML = `
-                <div class="min-h-screen w-full flex items-center justify-center p-4 bg-slate-950 text-white font-sans">
-                    <div class="max-w-md w-full bg-slate-900 border-2 border-slate-700 rounded-3xl p-8 text-center shadow-2xl space-y-5">
-                        <div class="w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-2xl mx-auto flex items-center justify-center text-3xl font-black shadow-inner">🔑</div>
-                        <div>
-                            <h2 class="text-2xl font-black tracking-tight">Aktivasi Lisensi Toko</h2>
-                            <p class="text-xs text-slate-400 mt-1">Masukkan kode lisensi resmi dari pusat.</p>
-                        </div>
-                        ${errorMsg ? `<div class="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-xl">${errorMsg}</div>` : ''}
-                        <div class="space-y-3">
-                            <input type="text" id="inputLicenseKey" placeholder="Contoh: ANT367..." class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-center font-extrabold uppercase tracking-widest outline-none focus:border-indigo-500 transition">
-                            <button onclick="submitLicense()" class="w-full py-3.5 bg-white text-slate-950 font-black rounded-xl hover:opacity-90 transition cursor-pointer shadow-md">Aktifkan Sekarang</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function submitLicense() {
-            const key = document.getElementById("inputLicenseKey").value.trim();
-            if (!key) {
-                alert("Masukkan kode lisensi terlebih dahulu!");
-                return;
-            }
-
-            fetch(`${SCRIPT_URL_PUSAT}?kode=${encodeURIComponent(key)}`, { method: "GET", redirect: "follow" })
+        // Cek Lisensi Otomatis saat halaman dimuat
+        window.addEventListener("DOMContentLoaded", () => {
+            fetch(`${SCRIPT_URL_PUSAT}?kode=${TOKO_ID}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === "AKTIF") {
-                        localStorage.setItem("app_license_key", key);
-                        alert("Aktivasi Berhasil! Memuat aplikasi...");
-                        location.reload();
+                        document.getElementById("appContainer").classList.remove("hidden");
+                        initApp();
                     } else {
-                        alert("Kode lisensi salah atau berstatus NONAKTIF di pusat.");
+                        document.body.innerHTML = `
+                            <div style="min-h-screen; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; font-family:'Plus Jakarta Sans',sans-serif; color:#fff; background:#020617;">
+                                <div style="background:#0f172a; border:2px solid #334155; padding:30px; border-radius:24px; max-width:400px; width:100%;">
+                                    <h2 style="font-size:22px; font-weight:800; margin-bottom:10px;">Akses Tidak Aktif</h2>
+                                    <p style="font-size:13px; color:#cbd5e1;">Layanan antrean untuk toko ini sedang ditangguhkan atau belum terdaftar. Silakan hubungi Administrator.</p>
+                                </div>
+                            </div>
+                        `;
                     }
                 })
                 .catch(() => {
-                    alert("Gagal terhubung ke server pusat.");
+                    document.body.innerHTML = `<h1 style="text-align:center; margin-top:20%; color:white; font-family:sans-serif;">Gagal terhubung ke server pusat.</h1>`;
                 });
-        }
+        });
 
         function updateRealTimeClock() {
             const now = new Date();
@@ -299,7 +260,15 @@
 
                             fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
                                 method: "GET",
-                                mode: "no-cors"
+                                redirect: "follow"
+                            })
+                            .then(res => res.json())
+                            .then(regRes => {
+                                if(regRes.status === "error") {
+                                    alert(regRes.pesan);
+                                    localStorage.clear();
+                                    location.reload();
+                                }
                             });
 
                             appendInstantToList(myRegisteredQueueNo, nama);
@@ -309,25 +278,9 @@
                             autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
                         })
                         .catch(() => {
-                            myRegisteredQueueNo = "A-001";
-                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
-                            localStorage.setItem("my_queue_name", nama);
-
-                            document.getElementById("formContainer").classList.add("hidden");
-                            document.getElementById("resultContainer").classList.remove("hidden");
-                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                            document.getElementById("displayName").innerText = nama;
-
-                            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
-                                method: "GET",
-                                mode: "no-cors"
-                            });
-
-                            appendInstantToList(myRegisteredQueueNo, nama);
-
-                            setTimeout(fetchAllQueueStatus, 2000);
-                            if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-                            autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+                            alert("Gagal memproses pendaftaran.");
+                            btn.disabled = false;
+                            btn.innerText = "Ambil Nomor Antrian";
                         });
                 });
             }
@@ -423,11 +376,6 @@
                     console.error("Gagal menarik data:", err);
                 });
         }
-
-        // Jalankan pengecekan lisensi saat halaman dimuat
-        window.addEventListener("DOMContentLoaded", () => {
-            checkAppLicense();
-        });
     </script>
 </body>
 </html>
