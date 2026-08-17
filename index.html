@@ -9,11 +9,13 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
+        /* Tema Gelap: Latar hitam pekat, teks putih bersih */
         .dark body { background-color: #020617; color: #ffffff; }
         .dark .glass-card { background: #0f172a; border: 2px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         .dark .box-element { background: #1e293b; border-color: #475569; color: #ffffff; }
         .dark .btn-theme { background-color: #ffffff; color: #000000; }
         
+        /* Tema Terang: Latar putih bersih, box putih bersih, teks hitam legam */
         .light body { background-color: #f1f5f9; color: #000000; }
         .light .glass-card { background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
         .light .box-element { background: #ffffff; border-color: #cbd5e1; color: #000000; }
@@ -25,33 +27,22 @@
         .text-muted { color: #334155; }
         .dark .text-muted { color: #cbd5e1; }
     </style>
+    <!-- Script awal untuk mengunci tema sebelum halaman dirender agar tidak berkedip/berubah -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            document.documentElement.className = savedTheme;
+        })();
+    </script>
 </head>
 <body class="min-h-screen p-3 sm:p-6 flex items-center justify-center transition-colors duration-300">
     
-    <!-- Modern Custom Modal / Popup -->
-    <div id="customModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="w-full max-w-sm glass-card rounded-3xl p-6 text-center border-2 shadow-2xl space-y-4 animate-in fade-in zoom-in duration-200">
-            <div id="modalIconContainer" class="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center box-element border-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            <div>
-                <h3 id="modalTitle" class="text-lg font-black text-main">Informasi</h3>
-                <p id="modalMessage" class="text-xs sm:text-sm text-muted font-bold mt-2">Pesan informasi sistem.</p>
-            </div>
-            <button onclick="closeModal()" class="w-full btn-theme font-black py-3 rounded-xl text-sm hover:opacity-95 transition shadow-md cursor-pointer">
-                OK, Mengerti
-            </button>
-        </div>
-    </div>
-
     <div class="w-full max-w-sm sm:max-w-md glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all">
         
-        <!-- Logo -->
+        <!-- Logo di Pojok Kiri Atas -->
         <img src="logo.png" alt="Logo" class="absolute top-5 left-5 w-11 h-11 rounded-xl shadow-sm border dark:border-slate-600 light:border-slate-300 object-cover z-20" onerror="this.style.display='none'">
 
-        <!-- Tombol Ganti Tema -->
+        <!-- Tombol Ganti Tema di Pojok Kanan Atas -->
         <button onclick="toggleTheme()" class="absolute top-5 right-5 p-2.5 rounded-xl border-2 dark:border-slate-600 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 z-20 cursor-pointer shadow-sm" title="Ganti Tema">
             <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden dark:text-amber-400 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -61,19 +52,14 @@
             </svg>
         </button>
 
-        <!-- Header -->
+        <!-- Nama Tempat, Alamat & Header -->
         <div class="text-center mb-6 pt-3">
             <h2 class="text-lg font-black text-main tracking-tight">Klinik Sehat Utama</h2>
             <p class="text-muted text-xs font-semibold mt-0.5">Jl. Raya Kesehatan No. 123, Jakarta</p>
             <h1 class="text-2xl font-black text-main mt-3">Antrian Digital</h1>
         </div>
 
-        <!-- Banner Peringatan Status Tutup -->
-        <div id="closedBanner" class="hidden mb-5 p-4 rounded-2xl bg-rose-500/20 border-2 border-rose-500 text-rose-500 text-center font-black text-xs sm:text-sm uppercase tracking-wider animate-pulse">
-            ⚠️ Pendaftaran Antrean Saat Ini Sedang Ditutup
-        </div>
-
-        <!-- Jam & Tanggal -->
+        <!-- Jam & Tanggal Besar -->
         <div class="mb-5 p-4 rounded-2xl box-element border-2 flex flex-col sm:flex-row justify-between items-center text-base sm:text-lg font-black shadow-inner gap-2 sm:gap-0">
             <div class="flex items-center space-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,7 +84,10 @@
                 </div>
                 <div>
                     <label class="flex items-center space-x-1.5 text-xs sm:text-sm font-black uppercase tracking-wider text-muted mb-1.5">
-                        <span>No Telepon</span>
+                        <span>No</span>
+                        <svg class="w-4 h-4 text-emerald-500 fill-current shrink-0" viewBox="0 0 24 24">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                        </svg>
                         <span class="font-normal opacity-90">(Opsional)</span>
                     </label>
                     <input type="tel" id="telepon" class="w-full px-4 py-4 rounded-xl border-2 box-element text-base font-extrabold outline-none transition" placeholder="">
@@ -119,25 +108,21 @@
             
             <div class="flex justify-between items-center p-4 rounded-2xl border-2 box-element">
                 <div class="text-left">
-                    <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Status / Sisa Antrian</p>
+                    <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Sisa Antrian</p>
                     <p id="statusInfoText" class="text-xs sm:text-sm text-main font-extrabold">Estimasi Real-time</p>
                 </div>
                 <div class="text-right">
-                    <span id="displayWaiting" class="text-2xl sm:text-3xl font-black text-main">0</span>
-                    <span id="unitOrang" class="text-xs sm:text-sm text-muted font-black ml-1">orang</span>
+                    <span id="displayWaiting" class="text-3xl font-black text-main">0</span>
+                    <span class="text-xs sm:text-sm text-muted font-black ml-1">orang</span>
                 </div>
             </div>
 
             <!-- Daftar Live Status -->
             <div class="box-element border-2 rounded-2xl p-4 shadow-sm">
-                <div class="flex items-center justify-between mb-3 px-1">
-                    <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted">Live Status Antrian</p>
-                    <span class="relative flex h-2.5 w-2.5">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                    </span>
+                <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted mb-3 px-1">Live Status Antrian</p>
+                <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList">
+                    <!-- List dirender secara otomatis -->
                 </div>
-                <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList"></div>
             </div>
 
             <div class="flex items-center justify-center space-x-2 pt-3 border-t-2 dark:border-slate-700 light:border-slate-300 text-xs sm:text-sm font-bold text-muted text-center">
@@ -154,24 +139,8 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
-        let modalCallback = null;
-        let isQueueClosed = false;
 
-        function showModal(title, message, callback = null) {
-            document.getElementById("modalTitle").innerText = title;
-            document.getElementById("modalMessage").innerText = message;
-            document.getElementById("customModal").classList.remove("hidden");
-            modalCallback = callback;
-        }
-
-        function closeModal() {
-            document.getElementById("customModal").classList.add("hidden");
-            if (modalCallback) {
-                modalCallback();
-                modalCallback = null;
-            }
-        }
-
+        // Jam & Tanggal Real-Time (Format Lengkap)
         function updateRealTimeClock() {
             const now = new Date();
             const optionsDate = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -185,27 +154,36 @@
 
         function toggleTheme() {
             const html = document.documentElement;
-            html.classList.toggle("dark");
-            html.classList.toggle("light");
-            localStorage.setItem("theme", html.classList.contains("dark") ? "dark" : "light");
+            const iconSun = document.getElementById("iconSun");
+            const iconMoon = document.getElementById("iconMoon");
+
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+                html.classList.add("light");
+                localStorage.setItem("theme", "light");
+                iconSun.classList.remove("hidden");
+                iconMoon.classList.add("hidden");
+            } else {
+                html.classList.remove("light");
+                html.classList.add("dark");
+                localStorage.setItem("theme", "dark");
+                iconSun.classList.add("hidden");
+                iconMoon.classList.remove("hidden");
+            }
         }
 
-        (function() {
-            const savedTheme = localStorage.getItem("theme") || "dark";
-            document.documentElement.classList.add(savedTheme);
-        })();
-
+        // Sinkronisasi ikon tema saat halaman dimuat
         window.addEventListener("DOMContentLoaded", () => {
             const savedTheme = localStorage.getItem("theme") || "dark";
             const iconSun = document.getElementById("iconSun");
             const iconMoon = document.getElementById("iconMoon");
 
             if (savedTheme === "light") {
-                if(iconSun) iconSun.classList.remove("hidden");
-                if(iconMoon) iconMoon.classList.add("hidden");
+                iconSun.classList.remove("hidden");
+                iconMoon.classList.add("hidden");
             } else {
-                if(iconSun) iconSun.classList.add("hidden");
-                if(iconMoon) iconMoon.classList.remove("hidden");
+                iconSun.classList.add("hidden");
+                iconMoon.classList.remove("hidden");
             }
 
             if (myRegisteredQueueNo) {
@@ -216,25 +194,15 @@
                 
                 fetchAllQueueStatus();
                 autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
-            } else {
-                // Cek status buka/tutup saat pertama kali load
-                fetchAllQueueStatus();
-                autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
             }
         });
 
         document.getElementById("queueForm").addEventListener("submit", function(e) {
             e.preventDefault();
             
-            if (isQueueClosed) {
-                showModal("Pendaftaran Ditutup", "Maaf, pendaftaran antrean saat ini sedang ditutup oleh admin.");
-                return;
-            }
-
             if (localStorage.getItem("my_queue_number")) {
-                showModal("Perhatian", "Anda sudah terdaftar di dalam antrian!", () => {
-                    location.reload();
-                });
+                alert("Anda sudah terdaftar di dalam antrian!");
+                location.reload();
                 return;
             }
 
@@ -245,22 +213,23 @@
             const nama = document.getElementById("nama").value;
             const telepon = document.getElementById("telepon").value;
 
-            // Mengirim request pendaftaran ke backend
-            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
-                method: "GET",
-                redirect: "follow"
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "closed") {
-                    btn.disabled = false;
-                    btn.innerText = "Ambil Nomor Antrian";
-                    showModal("Pendaftaran Ditutup", data.pesan);
-                    return;
-                }
+            fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
+                .then(res => res.json())
+                .then(data => {
+                    let nextNum = 1;
+                    if (data && data.list && data.list.length > 0) {
+                        let maxNum = 0;
+                        data.list.forEach(item => {
+                            let parsed = parseInt(item.noAntrian.toString().replace(/\D/g, ''));
+                            if (!isNaN(parsed) && parsed > maxNum) {
+                                maxNum = parsed;
+                            }
+                        });
+                        nextNum = maxNum + 1;
+                    }
 
-                if (data.status === "success" && data.noAntrian) {
-                    myRegisteredQueueNo = data.noAntrian;
+                    myRegisteredQueueNo = "A-" + ("000" + nextNum).slice(-3);
+
                     localStorage.setItem("my_queue_number", myRegisteredQueueNo);
                     localStorage.setItem("my_queue_name", nama);
 
@@ -269,87 +238,92 @@
                     document.getElementById("displayNo").innerText = myRegisteredQueueNo;
                     document.getElementById("displayName").innerText = nama;
 
-                    fetchAllQueueStatus();
-                }
-            })
-            .catch(() => {
-                btn.disabled = false;
-                btn.innerText = "Ambil Nomor Antrian";
-                showModal("Kesalahan", "Gagal mendaftar ke server. Silakan coba lagi.");
-            });
+                    fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                        method: "GET",
+                        mode: "no-cors"
+                    });
+
+                    appendInstantToList(myRegisteredQueueNo, nama);
+
+                    setTimeout(fetchAllQueueStatus, 2000);
+                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+                })
+                .catch(() => {
+                    myRegisteredQueueNo = "A-001";
+                    localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                    localStorage.setItem("my_queue_name", nama);
+
+                    document.getElementById("formContainer").classList.add("hidden");
+                    document.getElementById("resultContainer").classList.remove("hidden");
+                    document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                    document.getElementById("displayName").innerText = nama;
+
+                    fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                        method: "GET",
+                        mode: "no-cors"
+                    });
+
+                    appendInstantToList(myRegisteredQueueNo, nama);
+
+                    setTimeout(fetchAllQueueStatus, 2000);
+                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+                });
         });
+
+        function appendInstantToList(qNo, qNama) {
+            const listContainer = document.getElementById("liveQueueList");
+            if (listContainer.innerHTML.includes("Belum ada antrian") || listContainer.innerHTML.trim() === "") {
+                listContainer.innerHTML = "";
+            }
+
+            listContainer.innerHTML += `
+                <div class="p-3 rounded-xl border-2 box-element flex justify-between items-center text-xs sm:text-sm shadow-sm">
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <span class="font-black text-main text-sm sm:text-base box-element px-2.5 py-1 rounded-lg border-2 shrink-0">${qNo}</span>
+                        <span class="text-main font-extrabold truncate max-w-[110px] sm:max-w-[140px]">${qNama} <span class="font-black underline">(Anda)</span></span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider box-element text-main font-black border-2 shrink-0">Menunggu</span>
+                </div>
+            `;
+            document.getElementById("displayWaiting").innerText = "0";
+        }
 
         function fetchAllQueueStatus() {
             fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
                 .then(res => res.json())
                 .then(data => {
-                    if (!data) return;
-
-                    // Deteksi status Buka / Tutup
-                    const banner = document.getElementById("closedBanner");
-                    const submitBtn = document.getElementById("btnSubmit");
-                    
-                    if (data.queueStatus && data.queueStatus.toLowerCase() === "tutup") {
-                        isQueueClosed = true;
-                        if (banner) banner.classList.remove("hidden");
-                        if (submitBtn && !myRegisteredQueueNo) {
-                            submitBtn.disabled = true;
-                            submitBtn.innerText = "PENDAFTARAN DITUTUP";
-                            submitBtn.classList.add("opacity-50", "cursor-not-allowed");
-                        }
-                    } else {
-                        isQueueClosed = false;
-                        if (banner) banner.classList.add("hidden");
-                        if (submitBtn && !myRegisteredQueueNo) {
-                            submitBtn.disabled = false;
-                            submitBtn.innerText = "Ambil Nomor Antrian";
-                            submitBtn.classList.remove("opacity-50", "cursor-not-allowed");
-                        }
-                    }
-
-                    if (!data.list) return;
+                    if (!data || !data.list) return;
 
                     const listContainer = document.getElementById("liveQueueList");
                     listContainer.innerHTML = ""; 
 
-                    let activeList = data.list.filter(item => item.status === "menunggu" || item.status === "dipanggil");
-                    let waitingList = data.list.filter(item => item.status === "menunggu");
-                    let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
-                    let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
-
-                    const displayWaitingEl = document.getElementById("displayWaiting");
-                    const unitOrangEl = document.getElementById("unitOrang");
-                    const statusInfoTextEl = document.getElementById("statusInfoText");
-
-                    if (foundInList) {
-                        if (foundInList.status === "selesai") {
-                            localStorage.removeItem("my_queue_number");
-                            localStorage.removeItem("my_queue_name");
-                            showModal("Selesai", "Layanan telah selesai. Terima kasih!", () => {
-                                location.reload();
-                            });
-                            return;
-                        } else if (foundInList.status === "dipanggil") {
-                            statusInfoTextEl.innerText = "Status Anda:";
-                            displayWaitingEl.innerText = "GILIRAN ANDA!";
-                            unitOrangEl.style.display = "none";
-                        } else {
-                            statusInfoTextEl.innerText = "Estimasi Real-time";
-                            unitOrangEl.style.display = "inline";
-                            if (myIndex !== -1) {
-                                displayWaitingEl.innerText = myIndex;
-                            } else {
-                                displayWaitingEl.innerText = "0";
-                            }
-                        }
-                    }
-
-                    if (activeList.length === 0) {
+                    if (data.list.length === 0) {
                         listContainer.innerHTML = `<p class="text-xs sm:text-sm text-muted text-center py-3 font-bold">Belum ada antrian</p>`;
                         return;
                     }
 
-                    activeList.forEach(item => {
+                    let waitingList = data.list.filter(item => item.status === "menunggu");
+                    let myIndex = waitingList.findIndex(item => item.noAntrian === myRegisteredQueueNo);
+                    let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
+
+                    if (foundInList) {
+                        if (foundInList.status === "selesai") {
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "SELESAI";
+                        } else if (foundInList.status === "dipanggil") {
+                            document.getElementById("statusInfoText").innerText = "Status Anda:";
+                            document.getElementById("displayWaiting").innerText = "GILIRAN!";
+                        } else {
+                            if (myIndex !== -1) {
+                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
+                                document.getElementById("displayWaiting").innerText = myIndex;
+                            }
+                        }
+                    }
+
+                    data.list.forEach(item => {
                         let badgeClass = "box-element text-main";
                         let statusText = item.status;
 
@@ -359,6 +333,9 @@
                         } else if (item.status === "dipanggil") {
                             badgeClass = "dark:bg-white dark:text-slate-900 light:bg-slate-900 light:text-white font-black animate-pulse";
                             statusText = "Dipanggil";
+                        } else if (item.status === "selesai") {
+                            badgeClass = "box-element text-muted opacity-80";
+                            statusText = "Selesai";
                         }
 
                         let isMyNumber = (item.noAntrian === myRegisteredQueueNo);
@@ -368,7 +345,7 @@
                             <div class="p-3 rounded-xl border-2 ${cardHighlight} flex justify-between items-center text-xs sm:text-sm transition-all shadow-sm">
                                 <div class="flex items-center space-x-3 overflow-hidden">
                                     <span class="font-black text-main text-sm sm:text-base box-element px-2.5 py-1 rounded-lg border-2 shrink-0">${item.noAntrian}</span>
-                                    <span class="text-main font-extrabold truncate max-w-[140px] sm:max-w-[180px]">${item.nama}</span>
+                                    <span class="text-main font-extrabold truncate max-w-[110px] sm:max-w-[140px]">${item.nama} ${isMyNumber ? '<span class="font-black underline">(Anda)</span>' : ''}</span>
                                 </div>
                                 <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider border-2 ${badgeClass} font-black shrink-0">${statusText}</span>
                             </div>
