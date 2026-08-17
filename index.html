@@ -9,13 +9,11 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
-        /* Tema Gelap: Latar hitam pekat, teks putih bersih */
         .dark body { background-color: #020617; color: #ffffff; }
         .dark .glass-card { background: #0f172a; border: 2px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
         .dark .box-element { background: #1e293b; border-color: #475569; color: #ffffff; }
         .dark .btn-theme { background-color: #ffffff; color: #000000; }
         
-        /* Tema Terang: Latar putih bersih, box putih bersih, teks hitam legam */
         .light body { background-color: #f1f5f9; color: #000000; }
         .light .glass-card { background: #ffffff; border: 2px solid #cbd5e1; box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.15); }
         .light .box-element { background: #ffffff; border-color: #cbd5e1; color: #000000; }
@@ -27,7 +25,6 @@
         .text-muted { color: #334155; }
         .dark .text-muted { color: #cbd5e1; }
     </style>
-    <!-- Script awal untuk mengunci tema sebelum halaman dirender agar tidak berkedip/berubah -->
     <script>
         (function() {
             const savedTheme = localStorage.getItem("theme") || "dark";
@@ -39,10 +36,8 @@
     
     <div class="w-full max-w-sm sm:max-w-md glass-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden transition-all">
         
-        <!-- Logo di Pojok Kiri Atas -->
         <img src="logo.png" alt="Logo" class="absolute top-5 left-5 w-11 h-11 rounded-xl shadow-sm border dark:border-slate-600 light:border-slate-300 object-cover z-20" onerror="this.style.display='none'">
 
-        <!-- Tombol Ganti Tema di Pojok Kanan Atas -->
         <button onclick="toggleTheme()" class="absolute top-5 right-5 p-2.5 rounded-xl border-2 dark:border-slate-600 light:border-slate-300 dark:bg-slate-800 light:bg-slate-100 transition-all hover:scale-105 z-20 cursor-pointer shadow-sm" title="Ganti Tema">
             <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden dark:text-amber-400 light:text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -52,14 +47,12 @@
             </svg>
         </button>
 
-        <!-- Nama Tempat, Alamat & Header -->
         <div class="text-center mb-6 pt-3">
             <h2 class="text-lg font-black text-main tracking-tight">Klinik Sehat Utama</h2>
             <p class="text-muted text-xs font-semibold mt-0.5">Jl. Raya Kesehatan No. 123, Jakarta</p>
             <h1 class="text-2xl font-black text-main mt-3">Antrian Digital</h1>
         </div>
 
-        <!-- Jam & Tanggal Besar -->
         <div class="mb-5 p-4 rounded-2xl box-element border-2 flex flex-col sm:flex-row justify-between items-center text-base sm:text-lg font-black shadow-inner gap-2 sm:gap-0">
             <div class="flex items-center space-x-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,7 +68,6 @@
             </div>
         </div>
 
-        <!-- Form Pendaftaran -->
         <div id="formContainer">
             <form id="queueForm" class="space-y-4">
                 <div>
@@ -98,7 +90,6 @@
             </form>
         </div>
 
-        <!-- Kartu Hasil Sukses & Live Status -->
         <div id="resultContainer" class="hidden space-y-4">
             <div class="text-center p-6 rounded-3xl border-2 box-element shadow-sm">
                 <p class="text-xs font-black uppercase tracking-widest text-muted">Nomor Antrian Anda</p>
@@ -117,12 +108,9 @@
                 </div>
             </div>
 
-            <!-- Daftar Live Status -->
             <div class="box-element border-2 rounded-2xl p-4 shadow-sm">
                 <p class="text-xs sm:text-sm font-black uppercase tracking-wider text-muted mb-3 px-1">Live Status Antrian</p>
-                <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList">
-                    <!-- List dirender secara otomatis -->
-                </div>
+                <div class="max-h-48 overflow-y-auto space-y-2.5 pr-1" id="liveQueueList"></div>
             </div>
 
             <div class="flex items-center justify-center space-x-2 pt-3 border-t-2 dark:border-slate-700 light:border-slate-300 text-xs sm:text-sm font-bold text-muted text-center">
@@ -137,15 +125,12 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvuNf5jovuu7T1cBeRZBpI3iM0NQbULg-TWr08rpl0G3evd-Gdctmbj7mcEYqhwHbZHg/exec";
-        
-        // Ganti URL di bawah ini dengan URL Web App Google Apps Script SPREADSHEET PUSAT Anda
         const SCRIPT_URL_PUSAT = "https://script.google.com/macros/s/AKfycbzsu-6dxTTR7k6tXcR9Wdeav8Hz7HWSOxt7lG5mLNe59O7zuyzKAFCTSQ8m3BglR3GbiA/exec";
 
         let autoUpdateInterval = null;
         let myRegisteredQueueNo = localStorage.getItem("my_queue_number") || null;
         let savedLicenseKey = localStorage.getItem("app_license_key") || "";
 
-        // Fungsi Validasi Lisensi ke Server Pusat
         function checkAppLicense() {
             if (!savedLicenseKey) {
                 showActivationScreen();
@@ -158,10 +143,13 @@
                     if (data.status !== "AKTIF") {
                         localStorage.removeItem("app_license_key");
                         showActivationScreen("Lisensi Anda tidak aktif atau masa aktifnya habis.");
+                    } else {
+                        initApp(); // Jalankan aplikasi setelah lisensi dipastikan AKTIF
                     }
                 })
                 .catch(err => {
                     console.error("Gagal memvalidasi lisensi ke pusat:", err);
+                    showActivationScreen("Gagal terhubung ke server pusat.");
                 });
         }
 
@@ -176,7 +164,7 @@
                         </div>
                         ${errorMsg ? `<div class="p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-xl">${errorMsg}</div>` : ''}
                         <div class="space-y-3">
-                            <input type="text" id="inputLicenseKey" placeholder="Contoh: UFO..." class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-center font-extrabold uppercase tracking-widest outline-none focus:border-indigo-500 transition">
+                            <input type="text" id="inputLicenseKey" placeholder="Contoh: ANT367..." class="w-full px-4 py-3.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-center font-extrabold uppercase tracking-widest outline-none focus:border-indigo-500 transition">
                             <button onclick="submitLicense()" class="w-full py-3.5 bg-white text-slate-950 font-black rounded-xl hover:opacity-90 transition cursor-pointer shadow-md">Aktifkan Sekarang</button>
                         </div>
                     </div>
@@ -207,7 +195,6 @@
                 });
         }
 
-        // Jam & Tanggal Real-Time (Format Lengkap)
         function updateRealTimeClock() {
             const now = new Date();
             const optionsDate = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -239,110 +226,116 @@
             }
         }
 
-        // Sinkronisasi ikon tema & cek lisensi pusat saat halaman dimuat
-        window.addEventListener("DOMContentLoaded", () => {
-            checkAppLicense(); // Cek lisensi ke pusat terlebih dahulu
-
+        function initApp() {
             const savedTheme = localStorage.getItem("theme") || "dark";
             const iconSun = document.getElementById("iconSun");
             const iconMoon = document.getElementById("iconMoon");
 
-            if (savedTheme === "light") {
-                iconSun.classList.remove("hidden");
-                iconMoon.classList.add("hidden");
-            } else {
-                iconSun.classList.add("hidden");
-                iconMoon.classList.remove("hidden");
+            if (iconSun && iconMoon) {
+                if (savedTheme === "light") {
+                    iconSun.classList.remove("hidden");
+                    iconMoon.classList.add("hidden");
+                } else {
+                    iconSun.classList.add("hidden");
+                    iconMoon.classList.remove("hidden");
+                }
             }
 
             if (myRegisteredQueueNo) {
-                document.getElementById("formContainer").classList.add("hidden");
-                document.getElementById("resultContainer").classList.remove("hidden");
-                document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                document.getElementById("displayName").innerText = localStorage.getItem("my_queue_name") || "Pelanggan";
-                
+                const formContainer = document.getElementById("formContainer");
+                const resultContainer = document.getElementById("resultContainer");
+                if (formContainer && resultContainer) {
+                    formContainer.classList.add("hidden");
+                    resultContainer.classList.remove("hidden");
+                    document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                    document.getElementById("displayName").innerText = localStorage.getItem("my_queue_name") || "Pelanggan";
+                }
                 fetchAllQueueStatus();
                 autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
             }
-        });
 
-        document.getElementById("queueForm").addEventListener("submit", function(e) {
-            e.preventDefault();
-            
-            if (localStorage.getItem("my_queue_number")) {
-                alert("Anda sudah terdaftar di dalam antrian!");
-                location.reload();
-                return;
-            }
-
-            const btn = document.getElementById("btnSubmit");
-            btn.disabled = true;
-            btn.innerText = "Memproses...";
-
-            const nama = document.getElementById("nama").value;
-            const telepon = document.getElementById("telepon").value;
-
-            fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
-                .then(res => res.json())
-                .then(data => {
-                    let nextNum = 1;
-                    if (data && data.list && data.list.length > 0) {
-                        let maxNum = 0;
-                        data.list.forEach(item => {
-                            let parsed = parseInt(item.noAntrian.toString().replace(/\D/g, ''));
-                            if (!isNaN(parsed) && parsed > maxNum) {
-                                maxNum = parsed;
-                            }
-                        });
-                        nextNum = maxNum + 1;
+            const queueForm = document.getElementById("queueForm");
+            if (queueForm) {
+                queueForm.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    
+                    if (localStorage.getItem("my_queue_number")) {
+                        alert("Anda sudah terdaftar di dalam antrian!");
+                        location.reload();
+                        return;
                     }
 
-                    myRegisteredQueueNo = "A-" + ("000" + nextNum).slice(-3);
+                    const btn = document.getElementById("btnSubmit");
+                    btn.disabled = true;
+                    btn.innerText = "Memproses...";
 
-                    localStorage.setItem("my_queue_number", myRegisteredQueueNo);
-                    localStorage.setItem("my_queue_name", nama);
+                    const nama = document.getElementById("nama").value;
+                    const telepon = document.getElementById("telepon").value;
 
-                    document.getElementById("formContainer").classList.add("hidden");
-                    document.getElementById("resultContainer").classList.remove("hidden");
-                    document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                    document.getElementById("displayName").innerText = nama;
+                    fetch(`${SCRIPT_URL}?action=getQueue`, { method: "GET", redirect: "follow" })
+                        .then(res => res.json())
+                        .then(data => {
+                            let nextNum = 1;
+                            if (data && data.list && data.list.length > 0) {
+                                let maxNum = 0;
+                                data.list.forEach(item => {
+                                    let parsed = parseInt(item.noAntrian.toString().replace(/\D/g, ''));
+                                    if (!isNaN(parsed) && parsed > maxNum) {
+                                        maxNum = parsed;
+                                    }
+                                });
+                                nextNum = maxNum + 1;
+                            }
 
-                    fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
-                        method: "GET",
-                        mode: "no-cors"
-                    });
+                            myRegisteredQueueNo = "A-" + ("000" + nextNum).slice(-3);
 
-                    appendInstantToList(myRegisteredQueueNo, nama);
+                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                            localStorage.setItem("my_queue_name", nama);
 
-                    setTimeout(fetchAllQueueStatus, 2000);
-                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-                    autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
-                })
-                .catch(() => {
-                    myRegisteredQueueNo = "A-001";
-                    localStorage.setItem("my_queue_number", myRegisteredQueueNo);
-                    localStorage.setItem("my_queue_name", nama);
+                            document.getElementById("formContainer").classList.add("hidden");
+                            document.getElementById("resultContainer").classList.remove("hidden");
+                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                            document.getElementById("displayName").innerText = nama;
 
-                    document.getElementById("formContainer").classList.add("hidden");
-                    document.getElementById("resultContainer").classList.remove("hidden");
-                    document.getElementById("displayNo").innerText = myRegisteredQueueNo;
-                    document.getElementById("displayName").innerText = nama;
+                            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                                method: "GET",
+                                mode: "no-cors"
+                            });
 
-                    fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
-                        method: "GET",
-                        mode: "no-cors"
-                    });
+                            appendInstantToList(myRegisteredQueueNo, nama);
 
-                    appendInstantToList(myRegisteredQueueNo, nama);
+                            setTimeout(fetchAllQueueStatus, 2000);
+                            if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                            autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+                        })
+                        .catch(() => {
+                            myRegisteredQueueNo = "A-001";
+                            localStorage.setItem("my_queue_number", myRegisteredQueueNo);
+                            localStorage.setItem("my_queue_name", nama);
 
-                    setTimeout(fetchAllQueueStatus, 2000);
-                    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-                    autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+                            document.getElementById("formContainer").classList.add("hidden");
+                            document.getElementById("resultContainer").classList.remove("hidden");
+                            document.getElementById("displayNo").innerText = myRegisteredQueueNo;
+                            document.getElementById("displayName").innerText = nama;
+
+                            fetch(`${SCRIPT_URL}?action=register&nama=${encodeURIComponent(nama)}&telepon=${encodeURIComponent(telepon)}`, {
+                                method: "GET",
+                                mode: "no-cors"
+                            });
+
+                            appendInstantToList(myRegisteredQueueNo, nama);
+
+                            setTimeout(fetchAllQueueStatus, 2000);
+                            if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                            autoUpdateInterval = setInterval(fetchAllQueueStatus, 4000);
+                        });
                 });
-        });
+            }
+        }
 
         function appendInstantToList(qNo, qNama) {
             const listContainer = document.getElementById("liveQueueList");
+            if (!listContainer) return;
             if (listContainer.innerHTML.includes("Belum ada antrian") || listContainer.innerHTML.trim() === "") {
                 listContainer.innerHTML = "";
             }
@@ -356,7 +349,8 @@
                     <span class="px-2.5 py-1 rounded-lg text-[10px] sm:text-xs uppercase tracking-wider box-element text-main font-black border-2 shrink-0">Menunggu</span>
                 </div>
             `;
-            document.getElementById("displayWaiting").innerText = "0";
+            const displayWaiting = document.getElementById("displayWaiting");
+            if (displayWaiting) displayWaiting.innerText = "0";
         }
 
         function fetchAllQueueStatus() {
@@ -366,6 +360,7 @@
                     if (!data || !data.list) return;
 
                     const listContainer = document.getElementById("liveQueueList");
+                    if (!listContainer) return;
                     listContainer.innerHTML = ""; 
 
                     if (data.list.length === 0) {
@@ -378,16 +373,19 @@
                     let foundInList = data.list.find(item => item.noAntrian === myRegisteredQueueNo);
 
                     if (foundInList) {
+                        const statusInfoText = document.getElementById("statusInfoText");
+                        const displayWaiting = document.getElementById("displayWaiting");
+
                         if (foundInList.status === "selesai") {
-                            document.getElementById("statusInfoText").innerText = "Status Anda:";
-                            document.getElementById("displayWaiting").innerText = "SELESAI";
+                            if (statusInfoText) statusInfoText.innerText = "Status Anda:";
+                            if (displayWaiting) displayWaiting.innerText = "SELESAI";
                         } else if (foundInList.status === "dipanggil") {
-                            document.getElementById("statusInfoText").innerText = "Status Anda:";
-                            document.getElementById("displayWaiting").innerText = "GILIRAN!";
+                            if (statusInfoText) statusInfoText.innerText = "Status Anda:";
+                            if (displayWaiting) displayWaiting.innerText = "GILIRAN!";
                         } else {
                             if (myIndex !== -1) {
-                                document.getElementById("statusInfoText").innerText = "Estimasi Real-time";
-                                document.getElementById("displayWaiting").innerText = myIndex;
+                                if (statusInfoText) statusInfoText.innerText = "Estimasi Real-time";
+                                if (displayWaiting) displayWaiting.innerText = myIndex;
                             }
                         }
                     }
@@ -425,6 +423,11 @@
                     console.error("Gagal menarik data:", err);
                 });
         }
+
+        // Jalankan pengecekan lisensi saat halaman dimuat
+        window.addEventListener("DOMContentLoaded", () => {
+            checkAppLicense();
+        });
     </script>
 </body>
 </html>
